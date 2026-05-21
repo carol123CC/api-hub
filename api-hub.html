@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 中转站</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --sidebar-bg: #0d1322;
+    --card-bg: #111827;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --primary: #6366f1;
+    --primary-hover: #5558e6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --transition: 0.2s ease;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; min-width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .sidebar-logo .icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), #8b5cf6); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .sidebar-logo .title { font-size: 16px; font-weight: 700; }
+  .sidebar-logo .title span { color: var(--text-muted); font-weight: 400; font-size: 12px; display: block; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; margin: 2px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-size: 14px; user-select: none; }
+  .nav-item:hover { background: rgba(99,102,241,0.08); color: var(--text); }
+  .nav-item.active { background: rgba(99,102,241,0.15); color: var(--primary); font-weight: 600; }
+  .nav-item .svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+  .sidebar-footer .user-info { display: flex; align-items: center; gap: 8px; }
+  .sidebar-footer .avatar { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .sidebar-footer .name { font-size: 13px; }
+  .sidebar-footer .role { font-size: 11px; color: var(--text-muted); }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .page { display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 28px 32px; }
+  .page.active { display: flex; }
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; }
+  .page-header p { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+  /* Cards */
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-header { font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { display: flex; flex-direction: column; gap: 6px; }
+  .stat-card .label { font-size: 12px; color: var(--text-muted); }
+  .stat-card .value { font-size: 28px; font-weight: 700; }
+  .stat-card .change { font-size: 12px; }
+  .stat-card .change.up { color: var(--green); }
+  .stat-card .change.down { color: var(--red); }
+
+  /* Model Grid */
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .model-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: var(--transition); cursor: pointer; }
+  .model-card:hover { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(99,102,241,0.2); }
+  .model-card .vendor { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; margin-bottom: 8px; }
+  .model-card .vendor.openai { background: rgba(34,197,94,0.15); color: var(--green); }
+  .model-card .vendor.anthropic { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .model-card .vendor.google { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .model-card .vendor.local { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .model-card h3 { font-size: 16px; margin-bottom: 4px; }
+  .model-card .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+  .model-card .specs { display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; }
+  .model-card .specs span { display: flex; align-items: center; gap: 3px; }
+  .model-card .pricing { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+  .model-card .pricing .price { font-size: 14px; font-weight: 600; }
+  .model-card .pricing .price small { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; }
+  .tag.hot { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag.new { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag.fast { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition); border: none; color: #fff; }
+  .btn-primary { background: var(--primary); }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-danger { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+  .btn-danger:hover { background: rgba(239,68,68,0.1); }
+
+  /* Inputs */
+  input, textarea, select { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text); font-size: 13px; outline: none; transition: var(--transition); font-family: inherit; }
+  input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+  input::placeholder { color: var(--text-muted); }
+  textarea { resize: vertical; min-height: 80px; }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input { flex: 1; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; color: var(--text-muted); font-weight: 500; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  tr:hover td { background: rgba(99,102,241,0.04); }
+  .code { font-family: 'Menlo', 'Consolas', monospace; font-size: 12px; color: var(--text-secondary); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+  .badge.success { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge.warn { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .badge.danger { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* Chat */
+  .chat-container { display: flex; flex: 1; gap: 16px; min-height: 0; }
+  .chat-sidebar { width: 260px; min-width: 260px; border-right: 1px solid var(--border); padding-right: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .chat-sidebar label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .chat-sidebar select, .chat-sidebar input { width: 100%; }
+  .param-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+  .param-row input[type="range"] { flex: 1; margin-right: 8px; accent-color: var(--primary); }
+  .param-row .val { font-size: 12px; color: var(--text-secondary); min-width: 32px; text-align: right; }
+  .chat-main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 8px 0; display: flex; flex-direction: column; gap: 12px; }
+  .chat-msg { display: flex; gap: 10px; max-width: 90%; }
+  .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .chat-msg.assistant { align-self: flex-start; }
+  .chat-msg .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .chat-msg.user .avatar { background: var(--primary); }
+  .chat-msg.assistant .avatar { background: var(--green); }
+  .chat-msg .bubble { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; line-height: 1.6; }
+  .chat-msg.user .bubble { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); }
+  .chat-input-row { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 8px; }
+  .chat-input-row textarea { flex: 1; min-height: 44px; max-height: 120px; }
+
+  /* Charts */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .chart-box { height: 280px; position: relative; }
+  .chart-box canvas { width: 100%; height: 100%; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .table-wrap { overflow-x: auto; }
+
+  /* Toast */
+  .toast { position: fixed; top: 20px; right: 20px; background: var(--green); color: #000; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; z-index: 100; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards; pointer-events: none; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; } }
+
+  /* Wallet */
+  .wallet-balance { display: flex; align-items: center; gap: 24px; margin-bottom: 20px; }
+  .balance-main { text-align: center; padding: 20px 32px; }
+  .balance-main .amount { font-size: 42px; font-weight: 700; background: linear-gradient(135deg, var(--primary), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .balance-main .label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .balance-actions { display: flex; flex-direction: column; gap: 8px; }
+  .redeem-section { display: flex; gap: 8px; margin-bottom: 16px; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); }
+  .empty svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { width: 60px; min-width: 60px; }
+    .sidebar-logo .title, .nav-item span:not(.svg), .sidebar-footer .name, .sidebar-footer .role { display: none; }
+    .page { padding: 16px; }
+    .charts-row { grid-template-columns: 1fr; }
+    .chat-sidebar { width: 200px; min-width: 200px; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">⚡</div>
+    <div class="title">API 中转站<span>AI Model Hub</span></div>
+  </div>
+  <nav>
+    <div class="nav-item active" data-page="models">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>模型广场</span>
+    </div>
+    <div class="nav-item" data-page="playground">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>体验中心</span>
+    </div>
+    <div class="nav-item" data-page="tokens">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>令牌管理</span>
+    </div>
+    <div class="nav-item" data-page="wallet">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 4v16M2 10h6M2 14h6"/></svg>
+      <span>钱包管理</span>
+    </div>
+    <div class="nav-item" data-page="dashboard">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>数据看板</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar">A</div>
+      <div>
+        <div class="name">Admin</div>
+        <div class="role">管理员</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- ========== 模型广场 ========== -->
+  <div class="page active" id="page-models">
+    <div class="page-header">
+      <h1>模型广场</h1>
+      <p>浏览和选择热门 AI 模型，覆盖对话、编程、图像等多种场景</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="filterModels('all')">全部</button>
+      <button class="btn btn-outline btn-sm" onclick="filterModels('chat')">对话模型</button>
+      <button class="btn btn-outline btn-sm" onclick="filterModels('code')">编程模型</button>
+      <button class="btn btn-outline btn-sm" onclick="filterModels('vision')">视觉模型</button>
+      <button class="btn btn-outline btn-sm" onclick="filterModels('embedding')">嵌入模型</button>
+    </div>
+    <div class="model-grid" id="modelGrid"></div>
+  </div>
+
+  <!-- ========== 体验中心 ========== -->
+  <div class="page" id="page-playground">
+    <div class="page-header">
+      <h1>体验中心</h1>
+      <p>在线测试模型效果，调整参数并实时查看输出</p>
+    </div>
+    <div class="chat-container">
+      <div class="chat-sidebar">
+        <div>
+          <label>选择模型</label>
+          <select id="chatModel">
+            <option value="gpt-4o">GPT-4o (OpenAI)</option>
+            <option value="claude-4-sonnet">Claude 4 Sonnet (Anthropic)</option>
+            <option value="deepseek-v3">DeepSeek V3</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Google)</option>
+            <option value="qwen-max">Qwen Max (阿里)</option>
+          </select>
+        </div>
+        <div>
+          <label>System Prompt</label>
+          <textarea id="systemPrompt" rows="3" placeholder="你是一个有帮助的AI助手...">你是一个有帮助的AI助手。</textarea>
+        </div>
+        <div>
+          <label>Temperature: <span id="tempVal" style="font-weight:600;">0.7</span></label>
+          <div class="param-row"><input type="range" min="0" max="2" step="0.1" value="0.7" id="temperature" oninput="document.getElementById('tempVal').textContent=this.value"> </div>
+        </div>
+        <div>
+          <label>Max Tokens: <span id="maxTokVal" style="font-weight:600;">2048</span></label>
+          <div class="param-row"><input type="range" min="64" max="8192" step="64" value="2048" id="maxTokens" oninput="document.getElementById('maxTokVal').textContent=this.value"> </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="clearChat()" style="margin-top:8px;">清空对话</button>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">
+          * 此处为演示界面，模拟模型回复
+        </div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg assistant">
+            <div class="avatar">AI</div>
+            <div class="bubble">你好！请在下方输入消息体验模型对话能力。左侧可以切换模型和调整参数。</div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chatInput" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+          <button class="btn btn-primary" onclick="sendMessage()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 令牌管理 ========== -->
+  <div class="page" id="page-tokens">
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h1>令牌管理</h1>
+        <p>管理 API 访问令牌，控制额度与权限</p>
+      </div>
+      <button class="btn btn-primary" onclick="createToken()">+ 创建令牌</button>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">使用统计概览</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="label">活跃令牌</div><div class="value" id="activeTokenCount">3</div></div>
+        <div class="stat-card"><div class="label">今日调用</div><div class="value">12,850</div><div class="change up">↑ 23%</div></div>
+        <div class="stat-card"><div class="label">今日消耗</div><div class="value">$4.28</div><div class="change up">↑ 8%</div></div>
+        <div class="stat-card"><div class="label">成功率</div><div class="value">99.7%</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">令牌列表</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>名称</th><th>密钥</th><th>模型</th><th>额度限制</th><th>已用额度</th><th>状态</th><th>过期时间</th><th>操作</th></tr></thead>
+          <tbody id="tokenTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 钱包管理 ========== -->
+  <div class="page" id="page-wallet">
+    <div class="page-header"><h1>钱包管理</h1><p>管理账户余额，使用兑换码充值</p></div>
+    <div class="stats-row">
+      <div class="card wallet-balance">
+        <div class="balance-main">
+          <div class="amount" id="walletBalance">$128.50</div>
+          <div class="label">可用余额</div>
+        </div>
+        <div class="balance-actions">
+          <button class="btn btn-primary btn-sm" onclick="showRecharge()">充值</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('redeemInput').focus()">兑换码</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">兑换码兑换</div>
+        <div class="redeem-section">
+          <input type="text" id="redeemInput" placeholder="输入8位兑换码" maxlength="8" style="flex:1;text-transform:uppercase;letter-spacing:2px;text-align:center;">
+          <button class="btn btn-primary" onclick="redeemCode()">兑换</button>
+        </div>
+        <div id="redeemMsg" style="font-size:12px;min-height:18px;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">交易记录</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时间</th><th>类型</th><th>金额</th><th>余额</th><th>备注</th></tr></thead>
+          <tbody id="txTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 数据看板 ========== -->
+  <div class="page" id="page-dashboard">
+    <div class="page-header"><h1>数据看板</h1><p>API 调用统计、模型使用分布与成本分析</p></div>
+    <div class="stats-row">
+      <div class="card stat-card"><div class="label">总调用次数</div><div class="value">2,384,291</div><div class="change up">↑ 31.2% 较上月</div></div>
+      <div class="card stat-card"><div class="label">活跃模型数</div><div class="value">18</div></div>
+      <div class="card stat-card"><div class="label">本月成本</div><div class="value">$1,247.30</div><div class="change down">↓ 5.8% 较上月</div></div>
+      <div class="card stat-card"><div class="label">平均延迟</div><div class="value">382ms</div><div class="change down">↓ 12ms</div></div>
+    </div>
+    <div class="charts-row" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-header">API 调用趋势（近7天）</div>
+        <div class="chart-box"><canvas id="callTrendChart"></canvas></div>
+        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span>调用次数</span><span><span class="dot" style="background:var(--green)"></span>成功次数</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header">模型用量分布</div>
+        <div class="chart-box"><canvas id="modelPieChart"></canvas></div>
+        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span>GPT-4o</span><span><span class="dot" style="background:var(--green)"></span>Claude</span><span><span class="dot" style="background:var(--amber)"></span>DeepSeek</span><span><span class="dot" style="background:var(--blue)"></span>其他</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">模型排行榜</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>排名</th><th>模型</th><th>调用次数</th><th>成功率</th><th>平均延迟</th><th>成本</th></tr></thead>
+          <tbody>
+            <tr><td>🥇 1</td><td>GPT-4o</td><td>842,310</td><td><span class="badge success">99.8%</span></td><td>320ms</td><td>$523.40</td></tr>
+            <tr><td>🥈 2</td><td>Claude 4 Sonnet</td><td>621,550</td><td><span class="badge success">99.6%</span></td><td>410ms</td><td>$341.20</td></tr>
+            <tr><td>🥉 3</td><td>DeepSeek V3</td><td>498,200</td><td><span class="badge success">99.3%</span></td><td>285ms</td><td>$89.50</td></tr>
+            <tr><td>4</td><td>Gemini 2.5 Pro</td><td>210,400</td><td><span class="badge success">99.5%</span></td><td>450ms</td><td>$156.80</td></tr>
+            <tr><td>5</td><td>Qwen Max</td><td>142,831</td><td><span class="badge warn">98.2%</span></td><td>520ms</td><td>$98.40</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ============ Navigation ============
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (page === 'dashboard') { setTimeout(drawCharts, 100); }
+  });
+});
+
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ============ 模型广场 ============
+const modelsData = [
+  { id:'gpt-4o', name:'GPT-4o', vendor:'openai', vendorName:'OpenAI', cat:'chat', desc:'多模态旗舰模型，支持文本/图像/音频输入输出，128K上下文', context:'128K', latency:'320ms', inputPrice:'$2.50', outputPrice:'$10.00', tags:['hot'] },
+  { id:'gpt-4o-mini', name:'GPT-4o Mini', vendor:'openai', vendorName:'OpenAI', cat:'chat', desc:'轻量高效模型，性价比极高，适合大规模部署', context:'128K', latency:'180ms', inputPrice:'$0.15', outputPrice:'$0.60', tags:['fast'] },
+  { id:'claude-4-sonnet', name:'Claude 4 Sonnet', vendor:'anthropic', vendorName:'Anthropic', cat:'chat', desc:'平衡性能与成本，200K上下文，擅长长文分析和推理', context:'200K', latency:'410ms', inputPrice:'$3.00', outputPrice:'$15.00', tags:['hot','new'] },
+  { id:'claude-4-opus', name:'Claude 4 Opus', vendor:'anthropic', vendorName:'Anthropic', cat:'code', desc:'最强推理模型，复杂编程和数学推理的顶级选择', context:'200K', latency:'680ms', inputPrice:'$15.00', outputPrice:'$75.00', tags:['new'] },
+  { id:'deepseek-v3', name:'DeepSeek V3', vendor:'local', vendorName:'DeepSeek', cat:'chat', desc:'国产开源旗舰，性能比肩国际顶尖模型，价格极低', context:'128K', latency:'285ms', inputPrice:'$0.27', outputPrice:'$1.10', tags:['hot','fast'] },
+  { id:'gemini-2.5-pro', name:'Gemini 2.5 Pro', vendor:'google', vendorName:'Google', cat:'vision', desc:'Google最新旗舰，原生多模态，1M超长上下文', context:'1M', latency:'450ms', inputPrice:'$1.25', outputPrice:'$5.00', tags:['new'] },
+  { id:'qwen-max', name:'Qwen Max', vendor:'local', vendorName:'阿里云', cat:'chat', desc:'通义千问旗舰版，中文能力出色，全面对标 GPT-4', context:'32K', latency:'520ms', inputPrice:'$0.57', outputPrice:'$1.71', tags:[] },
+  { id:'text-embedding-3', name:'Embedding V3 Large', vendor:'openai', vendorName:'OpenAI', cat:'embedding', desc:'高维度文本嵌入模型，3072维，检索精度领先', context:'8K', latency:'50ms', inputPrice:'$0.13', outputPrice:'-', tags:[] },
+];
+
+function renderModelGrid(filter = 'all') {
+  const filtered = filter === 'all' ? modelsData : modelsData.filter(m => m.cat === filter);
+  document.getElementById('modelGrid').innerHTML = filtered.map(m => `
+    <div class="model-card">
+      <span class="vendor ${m.vendor}">${m.vendorName}</span>
+      ${m.tags.map(t => `<span class="tag ${t}">${t==='hot'?'热门':t==='new'?'新品':t==='fast'?'极速':''}</span>`).join(' ')}
+      <h3>${m.name}</h3>
+      <div class="desc">${m.desc}</div>
+      <div class="specs">
+        <span>📐 ${m.context}</span><span>⚡ ${m.latency}</span>
+      </div>
+      <div class="pricing">
+        <div class="price">${m.inputPrice} <small>/ 1M tokens (输入)</small></div>
+        <button class="btn btn-primary btn-sm" onclick="switchToPlayground('${m.id}')">体验</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterModels(cat) { renderModelGrid(cat); }
+function switchToPlayground(modelId) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelector('.nav-item[data-page="playground"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-playground').classList.add('active');
+  const sel = document.getElementById('chatModel');
+  for (let o of sel.options) { if (o.value === modelId) { o.selected = true; break; } }
+}
+
+renderModelGrid();
+
+// ============ 体验中心 ============
+const demoReplies = {
+  'gpt-4o': '你好！我是 GPT-4o，OpenAI 的多模态旗舰模型。我可以处理文本、图像和音频输入，拥有 128K 的上下文窗口。有什么我可以帮你的吗？',
+  'claude-4-sonnet': '你好！我是 Claude 4 Sonnet，Anthropic 推出的高性能模型。我擅长长文档分析、代码编写和复杂推理，拥有 200K 上下文窗口。',
+  'deepseek-v3': '你好！我是 DeepSeek V3，由深度求索公司开发。我以极高的性价比著称，在数学、编程和中文任务上表现出色。',
+  'gemini-2.5-pro': '你好！我是 Gemini 2.5 Pro，Google 最新的旗舰多模态模型。我支持高达 1M token 的上下文窗口，适合处理超长文档。',
+  'qwen-max': '你好！我是通义千问 Max，阿里云出品的大型语言模型。我在中文理解、文档处理和代码生成方面都有着出色的表现。',
+};
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('chatMessages');
+  container.innerHTML += `<div class="chat-msg user"><div class="avatar">U</div><div class="bubble">${escapeHtml(msg)}</div></div>`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  const model = document.getElementById('chatModel').value;
+  setTimeout(() => {
+    const typingMsg = document.createElement('div');
+    typingMsg.className = 'chat-msg assistant';
+    typingMsg.innerHTML = '<div class="avatar">AI</div><div class="bubble" style="color:var(--text-muted)">思考中...</div>';
+    container.appendChild(typingMsg);
+    container.scrollTop = container.scrollHeight;
+    setTimeout(() => {
+      typingMsg.querySelector('.bubble').textContent = demoReplies[model] || '这是一个模拟的模型回复。';
+      typingMsg.querySelector('.bubble').style.color = '';
+      container.scrollTop = container.scrollHeight;
+    }, 800 + Math.random() * 1200);
+  }, 300);
+}
+
+function clearChat() {
+  document.getElementById('chatMessages').innerHTML = '';
+}
+
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ============ 令牌管理 ============
+let tokens = [
+  { id:1, name:'生产环境密钥', key:'sk-prod-8a7b3c2d1e4f5a6b7c8d9e0f', models:'全部模型', limit:'$100/月', used:'$42.30', status:'active', expires:'2027-01-15' },
+  { id:2, name:'开发测试密钥', key:'sk-dev-1a2b3c4d5e6f7a8b9c0d1e2f', models:'GPT-4o Mini, DeepSeek', limit:'$20/月', used:'$8.50', status:'active', expires:'2026-08-20' },
+  { id:3, name:'只读令牌', key:'sk-ro-9f8e7d6c5b4a39281706f5e4', models:'仅查询', limit:'$5/月', used:'$1.20', status:'active', expires:'2026-06-30' },
+];
+
+function renderTokenTable() {
+  document.getElementById('tokenTable').innerHTML = tokens.map(t => `
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td><span class="code">${t.key.slice(0,12)}...${t.key.slice(-4)}</span> <span style="cursor:pointer;font-size:12px;" onclick="copyToken('${t.key}')" title="复制">📋</span></td>
+      <td>${t.models}</td>
+      <td>${t.limit}</td>
+      <td>${t.used}</td>
+      <td><span class="badge ${t.status==='active'?'success':'danger'}">${t.status==='active'?'活跃':'已禁用'}</span></td>
+      <td>${t.expires}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="copyToken('${t.key}')">复制</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteToken(${t.id})" style="margin-left:4px;">删除</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('activeTokenCount').textContent = tokens.length;
+}
+
+function createToken() {
+  const name = prompt('令牌名称：', '新令牌');
+  if (!name) return;
+  const chars = 'abcdef0123456789';
+  let key = 'sk-';
+  for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+  tokens.push({ id:Date.now(), name, key, models:'全部模型', limit:'$50/月', used:'$0.00', status:'active', expires:'2027-05-21' });
+  renderTokenTable();
+  toast('令牌创建成功！请妥善保管密钥');
+}
+
+function deleteToken(id) { tokens = tokens.filter(t => t.id !== id); renderTokenTable(); toast('令牌已删除'); }
+function copyToken(key) { navigator.clipboard.writeText(key).then(() => toast('已复制到剪贴板')); }
+
+renderTokenTable();
+
+// ============ 钱包管理 ============
+let wallet = { balance: 128.50, transactions: [
+  { time:'2026-05-20 14:30', type:'消费', amount:'-$2.35', balance:'$128.50', note:'GPT-4o API 调用' },
+  { time:'2026-05-19 10:15', type:'充值', amount:'+$50.00', balance:'$130.85', note:'在线充值' },
+  { time:'2026-05-18 09:00', type:'消费', amount:'-$1.80', balance:'$80.85', note:'Claude API 调用' },
+  { time:'2026-05-17 16:45', type:'兑换', amount:'+$30.00', balance:'$82.65', note:'兑换码: SUMMER2026' },
+  { time:'2026-05-16 11:20', type:'消费', amount:'-$0.95', balance:'$52.65', note:'DeepSeek API 调用' },
+]};
+
+function renderWallet() {
+  document.getElementById('walletBalance').textContent = '$' + wallet.balance.toFixed(2);
+  document.getElementById('txTable').innerHTML = wallet.transactions.map(tx => `
+    <tr>
+      <td>${tx.time}</td>
+      <td><span class="badge ${tx.type==='充值'||tx.type==='兑换'?'success':tx.type==='消费'?'warn':'warn'}">${tx.type}</span></td>
+      <td style="color:${tx.amount.startsWith('+')?'var(--green)':'var(--text)'};">${tx.amount}</td>
+      <td>${tx.balance}</td>
+      <td>${tx.note}</td>
+    </tr>
+  `).join('');
+}
+
+function showRecharge() {
+  const amounts = ['10', '20', '50', '100', '200', '500'];
+  const html = '选择充值金额：\n' + amounts.map(a => `$${a}`).join(' / ');
+  const amt = prompt(html, '50');
+  if (!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
+  wallet.balance += parseFloat(amt);
+  wallet.transactions.unshift({ time:new Date().toLocaleString('zh-CN',{hour12:false}), type:'充值', amount:'+$'+parseFloat(amt).toFixed(2), balance:'$'+wallet.balance.toFixed(2), note:'在线充值' });
+  renderWallet();
+  toast(`充值成功！到账 $${parseFloat(amt).toFixed(2)}`);
+}
+
+const validCodes = { 'VIP2026':20, 'SUMMER':15, 'WELCOME':5, 'MODELHUB':30, 'NEWUSER':10 };
+function redeemCode() {
+  const input = document.getElementById('redeemInput');
+  const code = input.value.trim().toUpperCase();
+  const msgEl = document.getElementById('redeemMsg');
+  if (!code) { msgEl.innerHTML = '<span style="color:var(--red)">请输入兑换码</span>'; return; }
+  if (validCodes[code]) {
+    const amt = validCodes[code];
+    wallet.balance += amt;
+    wallet.transactions.unshift({ time:new Date().toLocaleString('zh-CN',{hour12:false}), type:'兑换', amount:'+$'+amt.toFixed(2), balance:'$'+wallet.balance.toFixed(2), note:'兑换码: '+code });
+    renderWallet();
+    msgEl.innerHTML = `<span style="color:var(--green)">兑换成功！到账 $${amt.toFixed(2)}，当前余额 $${wallet.balance.toFixed(2)}</span>`;
+    input.value = '';
+    toast(`兑换码兑换成功！+$${amt.toFixed(2)}`);
+  } else {
+    msgEl.innerHTML = '<span style="color:var(--red)">无效的兑换码，请检查后重试</span>';
+    // Show available codes as hint
+    msgEl.innerHTML += '<br><span style="color:var(--text-muted);font-size:11px;">可用测试码：VIP2026, SUMMER, WELCOME, MODELHUB, NEWUSER</span>';
+  }
+}
+
+renderWallet();
+
+// ============ 数据看板 ============
+function drawCharts() {
+  // Call trend chart
+  const ctx1 = document.getElementById('callTrendChart');
+  if (!ctx1) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = ctx1.parentElement.getBoundingClientRect();
+  ctx1.width = rect.width * dpr;
+  ctx1.height = rect.height * dpr;
+  const c1 = ctx1.getContext('2d');
+  c1.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  c1.clearRect(0, 0, w, h);
+
+  const days = ['5/15','5/16','5/17','5/18','5/19','5/20','5/21'];
+  const calls = [4200, 3800, 5100, 4600, 5800, 6200, 5400];
+  const success = [4150, 3720, 5050, 4520, 5750, 6150, 5350];
+  const maxVal = Math.max(...calls);
+  const pad = { top: 20, right: 20, bottom: 30, left: 50 };
+  const gw = w - pad.left - pad.right, gh = h - pad.top - pad.bottom;
+
+  // grid lines
+  c1.strokeStyle = '#1e293b';
+  c1.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (gh / 4) * i;
+    c1.beginPath(); c1.moveTo(pad.left, y); c1.lineTo(w - pad.right, y); c1.stroke();
+    c1.fillStyle = '#64748b'; c1.font = '11px -apple-system, sans-serif';
+    c1.fillText(Math.round(maxVal * (1 - i/4)), 0, y + 4);
+  }
+  // x labels
+  c1.textAlign = 'center';
+  days.forEach((d, i) => c1.fillText(d, pad.left + (gw / (days.length - 1)) * i, h - 8));
+
+  function drawLine(data, color) {
+    c1.strokeStyle = color;
+    c1.lineWidth = 2;
+    c1.beginPath();
+    data.forEach((val, i) => {
+      const x = pad.left + (gw / (data.length - 1)) * i;
+      const y = pad.top + gh - (val / maxVal) * gh;
+      if (i === 0) c1.moveTo(x, y); else c1.lineTo(x, y);
+    });
+    c1.stroke();
+    // dots
+    data.forEach((val, i) => {
+      const x = pad.left + (gw / (data.length - 1)) * i;
+      const y = pad.top + gh - (val / maxVal) * gh;
+      c1.fillStyle = color;
+      c1.beginPath(); c1.arc(x, y, 3, 0, Math.PI * 2); c1.fill();
+    });
+  }
+  drawLine(calls, '#6366f1');
+  drawLine(success, '#22c55e');
+
+  // Pie chart
+  const ctx2 = document.getElementById('modelPieChart');
+  const rect2 = ctx2.parentElement.getBoundingClientRect();
+  ctx2.width = rect2.width * dpr;
+  ctx2.height = rect2.height * dpr;
+  const c2 = ctx2.getContext('2d');
+  c2.scale(dpr, dpr);
+  const w2 = rect2.width, h2 = rect2.height;
+  const cx = w2 / 2, cy = h2 / 2, r = Math.min(cx, cy) - 20;
+  c2.clearRect(0, 0, w2, h2);
+
+  const slices = [
+    { val: 35, color: '#6366f1', label: 'GPT-4o' },
+    { val: 26, color: '#22c55e', label: 'Claude' },
+    { val: 21, color: '#f59e0b', label: 'DeepSeek' },
+    { val: 18, color: '#3b82f6', label: '其他' },
+  ];
+  const total = slices.reduce((s, sl) => s + sl.val, 0);
+  let angle = -Math.PI / 2;
+  slices.forEach(sl => {
+    const sliceAngle = (sl.val / total) * Math.PI * 2;
+    c2.fillStyle = sl.color;
+    c2.beginPath(); c2.moveTo(cx, cy);
+    c2.arc(cx, cy, r, angle, angle + sliceAngle);
+    c2.closePath(); c2.fill();
+    // label
+    const midAngle = angle + sliceAngle / 2;
+    const lx = cx + Math.cos(midAngle) * (r * 0.65);
+    const ly = cy + Math.sin(midAngle) * (r * 0.65);
+    c2.fillStyle = '#fff';
+    c2.font = 'bold 11px -apple-system, sans-serif';
+    c2.textAlign = 'center';
+    c2.fillText(sl.val + '%', lx, ly);
+    angle += sliceAngle;
+  });
+}
+
+// Draw charts when navigating to dashboard
+document.querySelector('.nav-item[data-page="dashboard"]').addEventListener('click', () => setTimeout(drawCharts, 150));
+
+// Initial draw if dashboard is visible
+setTimeout(drawCharts, 300);
+window.addEventListener('resize', () => { if (document.getElementById('page-dashboard').classList.contains('active')) drawCharts(); });
+</script>
+</body>
+</html>
