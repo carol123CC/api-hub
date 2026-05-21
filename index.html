@@ -6,32 +6,20 @@
 <title>API 中转站</title>
 <style>
   :root {
-    --bg: #0b0f19;
-    --sidebar-bg: #0d1322;
-    --card-bg: #111827;
-    --border: #1e293b;
-    --text: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --primary: #6366f1;
-    --primary-hover: #5558e6;
-    --green: #22c55e;
-    --red: #ef4444;
-    --amber: #f59e0b;
-    --blue: #3b82f6;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --transition: 0.2s ease;
+    --bg: #0b0f19; --sidebar-bg: #0d1322; --card-bg: #111827; --border: #1e293b;
+    --text: #e2e8f0; --text-secondary: #94a3b8; --text-muted: #64748b;
+    --primary: #6366f1; --primary-hover: #5558e6; --green: #22c55e;
+    --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6;
+    --radius: 10px; --radius-sm: 6px; --transition: 0.2s ease;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
-  /* Sidebar */
-  .sidebar { width: 240px; min-width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; overflow-y: auto; }
   .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
   .sidebar-logo .icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), #8b5cf6); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; }
   .sidebar-logo .title { font-size: 16px; font-weight: 700; }
   .sidebar-logo .title span { color: var(--text-muted); font-weight: 400; font-size: 12px; display: block; }
+  .nav-section { font-size: 11px; color: var(--text-muted); padding: 12px 20px 4px; text-transform: uppercase; letter-spacing: 1px; }
   .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; margin: 2px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-size: 14px; user-select: none; }
   .nav-item:hover { background: rgba(99,102,241,0.08); color: var(--text); }
   .nav-item.active { background: rgba(99,102,241,0.15); color: var(--primary); font-weight: 600; }
@@ -39,10 +27,8 @@
   .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
   .sidebar-footer .user-info { display: flex; align-items: center; gap: 8px; }
   .sidebar-footer .avatar { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
-  .sidebar-footer .name { font-size: 13px; }
-  .sidebar-footer .role { font-size: 11px; color: var(--text-muted); }
+  .sidebar-footer .name { font-size: 13px; } .sidebar-footer .role { font-size: 11px; color: var(--text-muted); }
 
-  /* Main */
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .page { display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 28px 32px; }
   .page.active { display: flex; }
@@ -50,18 +36,14 @@
   .page-header h1 { font-size: 22px; font-weight: 700; }
   .page-header p { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
 
-  /* Cards */
   .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
   .card-header { font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .stat-card { display: flex; flex-direction: column; gap: 6px; }
   .stat-card .label { font-size: 12px; color: var(--text-muted); }
   .stat-card .value { font-size: 28px; font-weight: 700; }
-  .stat-card .change { font-size: 12px; }
-  .stat-card .change.up { color: var(--green); }
-  .stat-card .change.down { color: var(--red); }
+  .stat-card .change { font-size: 12px; } .stat-card .change.up { color: var(--green); } .stat-card .change.down { color: var(--red); }
 
-  /* Model Grid */
   .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
   .model-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: var(--transition); cursor: pointer; }
   .model-card:hover { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(99,102,241,0.2); }
@@ -82,25 +64,21 @@
   .tag.new { background: rgba(34,197,94,0.15); color: var(--green); }
   .tag.fast { background: rgba(59,130,246,0.15); color: var(--blue); }
 
-  /* Buttons */
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition); border: none; color: #fff; }
-  .btn-primary { background: var(--primary); }
-  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-primary { background: var(--primary); } .btn-primary:hover { background: var(--primary-hover); }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
   .btn-sm { padding: 5px 10px; font-size: 12px; }
   .btn-danger { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
   .btn-danger:hover { background: rgba(239,68,68,0.1); }
+  .btn-warn { background: transparent; border: 1px solid rgba(245,158,11,0.3); color: var(--amber); }
+  .btn-warn:hover { background: rgba(245,158,11,0.1); }
 
-  /* Inputs */
   input, textarea, select { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text); font-size: 13px; outline: none; transition: var(--transition); font-family: inherit; }
   input:focus, textarea:focus, select:focus { border-color: var(--primary); }
-  input::placeholder { color: var(--text-muted); }
-  textarea { resize: vertical; min-height: 80px; }
-  .input-row { display: flex; gap: 8px; }
-  .input-row input { flex: 1; }
+  input::placeholder { color: var(--text-muted); } textarea { resize: vertical; min-height: 80px; }
+  .input-row { display: flex; gap: 8px; } .input-row input { flex: 1; }
 
-  /* Table */
   table { width: 100%; border-collapse: collapse; }
   th { text-align: left; font-size: 12px; color: var(--text-muted); font-weight: 500; padding: 10px 12px; border-bottom: 1px solid var(--border); }
   td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
@@ -110,6 +88,28 @@
   .badge.success { background: rgba(34,197,94,0.15); color: var(--green); }
   .badge.warn { background: rgba(245,158,11,0.15); color: var(--amber); }
   .badge.danger { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.info { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 10px 20px; cursor: pointer; font-size: 13px; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: var(--transition); }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 540px; max-height: 80vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .form-group input, .form-group select { width: 100%; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .checkbox-group label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text); cursor: pointer; }
+  .checkbox-group input[type="checkbox"] { accent-color: var(--primary); width: auto; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 
   /* Chat */
   .chat-container { display: flex; flex: 1; gap: 16px; min-height: 0; }
@@ -132,49 +132,52 @@
   .chat-input-row { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 8px; }
   .chat-input-row textarea { flex: 1; min-height: 44px; max-height: 120px; }
 
-  /* Charts */
-  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
-  .chart-box { height: 280px; position: relative; }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .charts-row.single-col { grid-template-columns: 1fr 1fr; }
+  .chart-box { height: 260px; position: relative; }
   .chart-box canvas { width: 100%; height: 100%; }
   .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
   .legend span { display: flex; align-items: center; gap: 4px; }
   .legend .dot { width: 8px; height: 8px; border-radius: 50%; }
   .table-wrap { overflow-x: auto; }
 
-  /* Toast */
-  .toast { position: fixed; top: 20px; right: 20px; background: var(--green); color: #000; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; z-index: 100; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards; pointer-events: none; }
+  .toast { position: fixed; top: 20px; right: 20px; background: var(--green); color: #000; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; z-index: 300; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards; pointer-events: none; }
   @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes fadeOut { to { opacity: 0; } }
 
-  /* Wallet */
-  .wallet-balance { display: flex; align-items: center; gap: 24px; margin-bottom: 20px; }
+  .wallet-balance { display: flex; align-items: center; gap: 24px; }
   .balance-main { text-align: center; padding: 20px 32px; }
   .balance-main .amount { font-size: 42px; font-weight: 700; background: linear-gradient(135deg, var(--primary), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .balance-main .label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
   .balance-actions { display: flex; flex-direction: column; gap: 8px; }
   .redeem-section { display: flex; gap: 8px; margin-bottom: 16px; }
 
-  /* Empty state */
-  .empty { text-align: center; padding: 40px; color: var(--text-muted); }
-  .empty svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+  /* Doc */
+  .doc-content { max-width: 800px; line-height: 1.8; }
+  .doc-content h2 { font-size: 18px; margin: 24px 0 12px; }
+  .doc-content h3 { font-size: 15px; margin: 16px 0 8px; }
+  .doc-content p { color: var(--text-secondary); margin-bottom: 8px; }
+  .doc-content .step { display: flex; gap: 12px; margin-bottom: 12px; }
+  .doc-content .step .num { width: 24px; height: 24px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .doc-content .code-block { background: #0a0e1a; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin: 8px 0; font-family: 'Menlo', 'Consolas', monospace; font-size: 12px; overflow-x: auto; }
+  .highlight { color: var(--primary); }
 
-  /* Responsive */
   @media (max-width: 768px) {
     .sidebar { width: 60px; min-width: 60px; }
-    .sidebar-logo .title, .nav-item span:not(.svg), .sidebar-footer .name, .sidebar-footer .role { display: none; }
-    .page { padding: 16px; }
-    .charts-row { grid-template-columns: 1fr; }
-    .chat-sidebar { width: 200px; min-width: 200px; }
+    .sidebar-logo .title, .nav-item span:not(.svg), .sidebar-footer .name, .sidebar-footer .role, .nav-section { display: none; }
+    .page { padding: 16px; } .charts-row { grid-template-columns: 1fr; } .chat-sidebar { width: 200px; min-width: 200px; }
   }
 
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  @media (max-width: 1200px) {
+    .charts-row { grid-template-columns: 1fr; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; } ::-webkit-scrollbar-track { background: transparent; }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- ============ SIDEBAR ============ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="icon">⚡</div>
@@ -201,27 +204,27 @@
       <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span>数据看板</span>
     </div>
+    <div class="nav-section">平台管理</div>
+    <div class="nav-item" data-page="system">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span>系统管理</span>
+    </div>
+    <div class="nav-item" data-page="docs">
+      <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>文档中心</span>
+    </div>
   </nav>
   <div class="sidebar-footer">
-    <div class="user-info">
-      <div class="avatar">A</div>
-      <div>
-        <div class="name">Admin</div>
-        <div class="role">管理员</div>
-      </div>
-    </div>
+    <div class="user-info"><div class="avatar">A</div><div><div class="name">Admin</div><div class="role">管理员</div></div></div>
   </div>
 </aside>
 
-<!-- Main -->
+<!-- ============ MAIN ============ -->
 <main class="main">
 
-  <!-- ========== 模型广场 ========== -->
+  <!-- 模型广场 -->
   <div class="page active" id="page-models">
-    <div class="page-header">
-      <h1>模型广场</h1>
-      <p>浏览和选择热门 AI 模型，覆盖对话、编程、图像等多种场景</p>
-    </div>
+    <div class="page-header"><h1>模型广场</h1><p>浏览和选择热门 AI 模型，覆盖对话、编程、图像等多种场景</p></div>
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
       <button class="btn btn-primary btn-sm" onclick="filterModels('all')">全部</button>
       <button class="btn btn-outline btn-sm" onclick="filterModels('chat')">对话模型</button>
@@ -232,66 +235,37 @@
     <div class="model-grid" id="modelGrid"></div>
   </div>
 
-  <!-- ========== 体验中心 ========== -->
+  <!-- 体验中心 -->
   <div class="page" id="page-playground">
-    <div class="page-header">
-      <h1>体验中心</h1>
-      <p>在线测试模型效果，调整参数并实时查看输出</p>
-    </div>
+    <div class="page-header"><h1>体验中心</h1><p>在线测试模型效果，调整参数并实时查看输出</p></div>
     <div class="chat-container">
       <div class="chat-sidebar">
-        <div>
-          <label>选择模型</label>
-          <select id="chatModel">
-            <option value="gpt-4o">GPT-4o (OpenAI)</option>
-            <option value="claude-4-sonnet">Claude 4 Sonnet (Anthropic)</option>
-            <option value="deepseek-v3">DeepSeek V3</option>
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Google)</option>
-            <option value="qwen-max">Qwen Max (阿里)</option>
-          </select>
-        </div>
-        <div>
-          <label>System Prompt</label>
-          <textarea id="systemPrompt" rows="3" placeholder="你是一个有帮助的AI助手...">你是一个有帮助的AI助手。</textarea>
-        </div>
-        <div>
-          <label>Temperature: <span id="tempVal" style="font-weight:600;">0.7</span></label>
-          <div class="param-row"><input type="range" min="0" max="2" step="0.1" value="0.7" id="temperature" oninput="document.getElementById('tempVal').textContent=this.value"> </div>
-        </div>
-        <div>
-          <label>Max Tokens: <span id="maxTokVal" style="font-weight:600;">2048</span></label>
-          <div class="param-row"><input type="range" min="64" max="8192" step="64" value="2048" id="maxTokens" oninput="document.getElementById('maxTokVal').textContent=this.value"> </div>
-        </div>
+        <div><label>选择模型</label><select id="chatModel">
+          <option value="gpt-4o">GPT-4o (OpenAI)</option><option value="claude-4-sonnet">Claude 4 Sonnet (Anthropic)</option>
+          <option value="deepseek-v3">DeepSeek V3</option><option value="gemini-2.5-pro">Gemini 2.5 Pro (Google)</option>
+          <option value="qwen-max">Qwen Max (阿里)</option>
+        </select></div>
+        <div><label>System Prompt</label><textarea id="systemPrompt" rows="3" placeholder="你是一个有帮助的AI助手...">你是一个有帮助的AI助手。</textarea></div>
+        <div><label>Temperature: <span id="tempVal" style="font-weight:600;">0.7</span></label><div class="param-row"><input type="range" min="0" max="2" step="0.1" value="0.7" id="temperature" oninput="document.getElementById('tempVal').textContent=this.value"></div></div>
+        <div><label>Max Tokens: <span id="maxTokVal" style="font-weight:600;">2048</span></label><div class="param-row"><input type="range" min="64" max="8192" step="64" value="2048" id="maxTokens" oninput="document.getElementById('maxTokVal').textContent=this.value"></div></div>
         <button class="btn btn-outline btn-sm" onclick="clearChat()" style="margin-top:8px;">清空对话</button>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">
-          * 此处为演示界面，模拟模型回复
-        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">* 此处为演示界面，模拟模型回复</div>
       </div>
       <div class="chat-main">
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg assistant">
-            <div class="avatar">AI</div>
-            <div class="bubble">你好！请在下方输入消息体验模型对话能力。左侧可以切换模型和调整参数。</div>
-          </div>
-        </div>
+        <div class="chat-messages" id="chatMessages"><div class="chat-msg assistant"><div class="avatar">AI</div><div class="bubble">你好！请在下方输入消息体验模型对话能力。左侧可以切换模型和调整参数。</div></div></div>
         <div class="chat-input-row">
           <textarea id="chatInput" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-          <button class="btn btn-primary" onclick="sendMessage()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-          </button>
+          <button class="btn btn-primary" onclick="sendMessage()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ========== 令牌管理 ========== -->
+  <!-- 令牌管理 -->
   <div class="page" id="page-tokens">
     <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <h1>令牌管理</h1>
-        <p>管理 API 访问令牌，控制额度与权限</p>
-      </div>
-      <button class="btn btn-primary" onclick="createToken()">+ 创建令牌</button>
+      <div><h1>令牌管理</h1><p>管理 API 访问令牌，控制额度与权限</p></div>
+      <button class="btn btn-primary" onclick="openTokenModal()">+ 创建令牌</button>
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">使用统计概览</div>
@@ -304,88 +278,184 @@
     </div>
     <div class="card">
       <div class="card-header">令牌列表</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>名称</th><th>密钥</th><th>模型</th><th>额度限制</th><th>已用额度</th><th>状态</th><th>过期时间</th><th>操作</th></tr></thead>
-          <tbody id="tokenTable"></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><table><thead><tr><th>名称</th><th>密钥</th><th>模型</th><th>额度限制</th><th>已用额度</th><th>状态</th><th>过期时间</th><th>操作</th></tr></thead><tbody id="tokenTable"></tbody></table></div>
     </div>
   </div>
 
-  <!-- ========== 钱包管理 ========== -->
+  <!-- 钱包管理 -->
   <div class="page" id="page-wallet">
     <div class="page-header"><h1>钱包管理</h1><p>管理账户余额，使用兑换码充值</p></div>
     <div class="stats-row">
-      <div class="card wallet-balance">
-        <div class="balance-main">
-          <div class="amount" id="walletBalance">$128.50</div>
-          <div class="label">可用余额</div>
-        </div>
-        <div class="balance-actions">
-          <button class="btn btn-primary btn-sm" onclick="showRecharge()">充值</button>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('redeemInput').focus()">兑换码</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">兑换码兑换</div>
-        <div class="redeem-section">
-          <input type="text" id="redeemInput" placeholder="输入8位兑换码" maxlength="8" style="flex:1;text-transform:uppercase;letter-spacing:2px;text-align:center;">
-          <button class="btn btn-primary" onclick="redeemCode()">兑换</button>
-        </div>
-        <div id="redeemMsg" style="font-size:12px;min-height:18px;"></div>
-      </div>
+      <div class="card wallet-balance"><div class="balance-main"><div class="amount" id="walletBalance">$128.50</div><div class="label">可用余额</div></div><div class="balance-actions"><button class="btn btn-primary btn-sm" onclick="showRecharge()">充值</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('redeemInput').focus()">兑换码</button></div></div>
+      <div class="card"><div class="card-header">兑换码兑换</div><div class="redeem-section"><input type="text" id="redeemInput" placeholder="输入兑换码" style="flex:1;text-transform:uppercase;letter-spacing:2px;text-align:center;"><button class="btn btn-primary" onclick="redeemCode()">兑换</button></div><div id="redeemMsg" style="font-size:12px;min-height:18px;"></div></div>
     </div>
-    <div class="card">
-      <div class="card-header">交易记录</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>时间</th><th>类型</th><th>金额</th><th>余额</th><th>备注</th></tr></thead>
-          <tbody id="txTable"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card"><div class="card-header">交易记录</div><div class="table-wrap"><table><thead><tr><th>时间</th><th>类型</th><th>金额</th><th>余额</th><th>备注</th></tr></thead><tbody id="txTable"></tbody></table></div></div>
   </div>
 
-  <!-- ========== 数据看板 ========== -->
+  <!-- 数据看板 -->
   <div class="page" id="page-dashboard">
-    <div class="page-header"><h1>数据看板</h1><p>API 调用统计、模型使用分布与成本分析</p></div>
+    <div class="page-header"><h1>数据看板</h1><p>API 调用统计、模型使用分布、成本分析与余额监控</p></div>
     <div class="stats-row">
       <div class="card stat-card"><div class="label">总调用次数</div><div class="value">2,384,291</div><div class="change up">↑ 31.2% 较上月</div></div>
-      <div class="card stat-card"><div class="label">活跃模型数</div><div class="value">18</div></div>
       <div class="card stat-card"><div class="label">本月成本</div><div class="value">$1,247.30</div><div class="change down">↓ 5.8% 较上月</div></div>
+      <div class="card stat-card"><div class="label">已消耗额度</div><div class="value" style="color:var(--red);">$1,118.80</div><div class="label">本月已用 / 总额度 $2,000</div></div>
+      <div class="card stat-card"><div class="label">当前余额</div><div class="value" style="color:var(--green);">$128.50</div><div class="change up">+$58.50 本月</div></div>
+      <div class="card stat-card"><div class="label">活跃模型数</div><div class="value">18</div></div>
       <div class="card stat-card"><div class="label">平均延迟</div><div class="value">382ms</div><div class="change down">↓ 12ms</div></div>
     </div>
     <div class="charts-row" style="margin-bottom:16px;">
-      <div class="card">
-        <div class="card-header">API 调用趋势（近7天）</div>
-        <div class="chart-box"><canvas id="callTrendChart"></canvas></div>
-        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span>调用次数</span><span><span class="dot" style="background:var(--green)"></span>成功次数</span></div>
-      </div>
-      <div class="card">
-        <div class="card-header">模型用量分布</div>
-        <div class="chart-box"><canvas id="modelPieChart"></canvas></div>
-        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span>GPT-4o</span><span><span class="dot" style="background:var(--green)"></span>Claude</span><span><span class="dot" style="background:var(--amber)"></span>DeepSeek</span><span><span class="dot" style="background:var(--blue)"></span>其他</span></div>
+      <div class="card"><div class="card-header">API 调用趋势（近7天）</div><div class="chart-box"><canvas id="callTrendChart"></canvas></div><div class="legend"><span><span class="dot" style="background:var(--primary)"></span>调用次数</span><span><span class="dot" style="background:var(--green)"></span>成功次数</span></div></div>
+      <div class="card"><div class="card-header">Token 消耗趋势（近7天）</div><div class="chart-box"><canvas id="tokenTrendChart"></canvas></div><div class="legend"><span><span class="dot" style="background:var(--primary)"></span>输入Token</span><span><span class="dot" style="background:var(--amber)"></span>输出Token</span><span><span class="dot" style="background:var(--green)"></span>总Token</span></div></div>
+    </div>
+    <div class="charts-row" style="margin-bottom:16px;">
+      <div class="card"><div class="card-header">模型用量分布</div><div class="chart-box"><canvas id="modelPieChart"></canvas></div><div class="legend"><span><span class="dot" style="background:var(--primary)"></span>GPT-4o</span><span><span class="dot" style="background:var(--green)"></span>Claude</span><span><span class="dot" style="background:var(--amber)"></span>DeepSeek</span><span><span class="dot" style="background:var(--blue)"></span>其他</span></div></div>
+      <div class="card"><div class="card-header">模型成本分布（本月）</div><div class="chart-box"><canvas id="costBarChart"></canvas></div></div>
+    </div>
+    <div class="card"><div class="card-header">模型排行榜</div><div class="table-wrap"><table><thead><tr><th>排名</th><th>模型</th><th>调用次数</th><th>成功率</th><th>平均延迟</th><th>成本</th></tr></thead>
+    <tbody><tr><td>🥇 1</td><td>GPT-4o</td><td>842,310</td><td><span class="badge success">99.8%</span></td><td>320ms</td><td>$523.40</td></tr>
+    <tr><td>🥈 2</td><td>Claude 4 Sonnet</td><td>621,550</td><td><span class="badge success">99.6%</span></td><td>410ms</td><td>$341.20</td></tr>
+    <tr><td>🥉 3</td><td>DeepSeek V3</td><td>498,200</td><td><span class="badge success">99.3%</span></td><td>285ms</td><td>$89.50</td></tr>
+    <tr><td>4</td><td>Gemini 2.5 Pro</td><td>210,400</td><td><span class="badge success">99.5%</span></td><td>450ms</td><td>$156.80</td></tr>
+    <tr><td>5</td><td>Qwen Max</td><td>142,831</td><td><span class="badge warn">98.2%</span></td><td>520ms</td><td>$98.40</td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- 系统管理 -->
+  <div class="page" id="page-system">
+    <div class="page-header"><h1>系统管理</h1><p>模型引入、定价配置与用户管理</p></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="model-import">模型引入</div>
+      <div class="tab" data-tab="model-pricing">模型定价</div>
+      <div class="tab" data-tab="user-mgmt">用户管理</div>
+    </div>
+    <div id="tab-model-import" class="tab-content" style="display:block;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px;"><div class="card-header" style="margin-bottom:0;">已引入模型</div><button class="btn btn-primary btn-sm" onclick="openImportModelModal()">+ 引入模型</button></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>模型名称</th><th>供应商</th><th>类型</th><th>场景标签</th><th>上下文</th><th>输入形态</th><th>引入渠道</th><th>状态</th><th>操作</th></tr></thead><tbody id="importedModelsTable"></tbody></table></div></div>
+    </div>
+    <div id="tab-model-pricing" class="tab-content" style="display:none;">
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>模型</th><th>计费方式</th><th>输入价格 (1M tokens)</th><th>输出价格 (1M tokens)</th><th>按次调用价格</th><th>最低充值</th><th>状态</th><th>操作</th></tr></thead><tbody id="pricingTable"></tbody></table></div></div>
+    </div>
+    <div id="tab-user-mgmt" class="tab-content" style="display:none;">
+      <div style="display:flex;gap:8px;margin-bottom:16px;"><input type="text" id="userSearch" placeholder="搜索用户 邮箱/手机号..." style="width:280px;" oninput="renderUserTable()"><button class="btn btn-outline btn-sm" onclick="document.getElementById('userSearch').value='';renderUserTable();">清除</button></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>用户ID</th><th>邮箱</th><th>注册时间</th><th>累计消费</th><th>余额</th><th>状态</th><th>操作</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- 文档中心 -->
+  <div class="page" id="page-docs">
+    <div class="page-header"><h1>文档中心</h1><p>用户操作手册、账单查询与发票管理</p></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="doc-manual">用户操作手册</div>
+      <div class="tab" data-tab="doc-billing">充值账单查询</div>
+      <div class="tab" data-tab="doc-invoice">开发票</div>
+    </div>
+    <div id="tab-doc-manual" class="tab-content" style="display:block;">
+      <div class="card doc-content">
+        <h2>API 中转站用户操作手册</h2>
+        <p>欢迎使用 API 中转站！本手册将帮助您快速上手，通过统一接口调用多个 AI 模型服务。</p>
+        <h3>第一步：注册与登录</h3>
+        <div class="step"><span class="num">1</span><span>访问 api-hub.example.com 点击注册按钮</span></div>
+        <div class="step"><span class="num">2</span><span>填写邮箱地址并设置密码，或使用第三方登录</span></div>
+        <div class="step"><span class="num">3</span><span>验证邮箱后即可登录，新用户赠送 $5 体验金</span></div>
+        <h3>第二步：获取 API 令牌</h3>
+        <div class="step"><span class="num">1</span><span>登录后进入「令牌管理」页面</span></div>
+        <div class="step"><span class="num">2</span><span>点击「创建令牌」，填写令牌名称、勾选可用模型</span></div>
+        <div class="step"><span class="num">3</span><span>设置额度限制（每日/每月消费上限）和过期时间</span></div>
+        <div class="step"><span class="num">4</span><span>创建成功后复制密钥（格式：<span class="highlight">sk-xxxx...xxxx</span>），请妥善保管</span></div>
+        <h3>第三步：调用 API</h3>
+        <p>所有模型均通过 OpenAI 兼容接口调用，只需修改 base_url 和 model 参数：</p>
+        <div class="code-block">curl https://api-hub.example.com/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer <span class="highlight">sk-YOUR-TOKEN</span>" \
+          -d '{"model": "<span class="highlight">gpt-4o</span>", "messages": [{"role": "user", "content": "你好"}]}'</div>
+        <h3>第四步：充值与管理</h3>
+        <p>进入「钱包管理」页面，可通过在线支付充值或使用兑换码。在「数据看板」查看用量统计和成本分析。</p>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header">模型排行榜</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>排名</th><th>模型</th><th>调用次数</th><th>成功率</th><th>平均延迟</th><th>成本</th></tr></thead>
-          <tbody>
-            <tr><td>🥇 1</td><td>GPT-4o</td><td>842,310</td><td><span class="badge success">99.8%</span></td><td>320ms</td><td>$523.40</td></tr>
-            <tr><td>🥈 2</td><td>Claude 4 Sonnet</td><td>621,550</td><td><span class="badge success">99.6%</span></td><td>410ms</td><td>$341.20</td></tr>
-            <tr><td>🥉 3</td><td>DeepSeek V3</td><td>498,200</td><td><span class="badge success">99.3%</span></td><td>285ms</td><td>$89.50</td></tr>
-            <tr><td>4</td><td>Gemini 2.5 Pro</td><td>210,400</td><td><span class="badge success">99.5%</span></td><td>450ms</td><td>$156.80</td></tr>
-            <tr><td>5</td><td>Qwen Max</td><td>142,831</td><td><span class="badge warn">98.2%</span></td><td>520ms</td><td>$98.40</td></tr>
-          </tbody>
-        </table>
+    <div id="tab-doc-billing" class="tab-content" style="display:none;">
+      <div style="display:flex;gap:8px;margin-bottom:16px;"><input type="date" id="billStart" style="width:150px;" onchange="renderBilling()" value="2026-05-01"><span style="color:var(--text-muted);align-self:center;">至</span><input type="date" id="billEnd" style="width:150px;" onchange="renderBilling()" value="2026-05-21"><button class="btn btn-primary btn-sm" onclick="renderBilling()">查询</button></div>
+      <div class="card"><div class="card-header">充值账单记录</div><div class="table-wrap"><table><thead><tr><th>账单编号</th><th>时间</th><th>金额</th><th>支付方式</th><th>状态</th><th>备注</th></tr></thead><tbody id="billingTable"></tbody></table></div><div style="margin-top:12px;font-weight:600;" id="billingTotal"></div></div>
+    </div>
+    <div id="tab-doc-invoice" class="tab-content" style="display:none;">
+      <div class="card" style="max-width:600px;">
+        <h2 style="margin-bottom:16px;">申请发票</h2>
+        <div class="form-group"><label>发票类型</label><select id="invoiceType"><option>增值税电子普通发票</option><option>增值税专用发票</option></select></div>
+        <div class="form-group"><label>发票抬头</label><input type="text" id="invoiceTitle" placeholder="公司全称或个人姓名"></div>
+        <div class="form-group"><label>税号</label><input type="text" id="invoiceTaxNo" placeholder="统一社会信用代码（企业必填）"></div>
+        <div class="form-group"><label>发票金额</label><input type="text" id="invoiceAmount" placeholder="请输入需开票金额"></div>
+        <div class="form-group"><label>接收邮箱</label><input type="text" id="invoiceEmail" placeholder="发票将发送至此邮箱"></div>
+        <button class="btn btn-primary" onclick="submitInvoice()">提交申请</button>
+        <div id="invoiceMsg" style="margin-top:12px;font-size:13px;"></div>
       </div>
     </div>
   </div>
 
 </main>
+
+<!-- ============ 令牌创建/编辑弹窗 ============ -->
+<div class="modal-overlay" id="tokenModal">
+  <div class="modal">
+    <h2 id="tokenModalTitle">创建令牌</h2>
+    <div class="form-group"><label>令牌名称</label><input type="text" id="tokenName" placeholder="如：生产环境密钥"></div>
+    <div class="form-group"><label>勾选可用模型</label><div class="checkbox-group" id="modelCheckboxes"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>限制周期</label><select id="tokenLimitPeriod"><option value="day">每日</option><option value="month">每月</option></select></div>
+      <div class="form-group"><label>额度上限 ($)</label><input type="number" id="tokenLimitAmount" value="50" min="1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>过期时间</label><input type="date" id="tokenExpires" value="2027-05-21"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeTokenModal()">取消</button>
+      <button class="btn btn-primary" id="tokenModalConfirm" onclick="confirmToken()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 模型引入弹窗 ============ -->
+<div class="modal-overlay" id="importModelModal">
+  <div class="modal">
+    <h2>引入新模型</h2>
+    <div class="form-group"><label>模型名称</label><input type="text" id="importModelName" placeholder="如：Llama-4-Maverick"></div>
+    <div class="form-group"><label>描述</label><textarea id="importModelDesc" rows="2" placeholder="简要描述模型能力和特点"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>类型</label><select id="importModelType"><option>对话模型</option><option>编程模型</option><option>视觉模型</option><option>嵌入模型</option></select></div>
+      <div class="form-group"><label>供应商</label><select id="importModelVendor"><option>OpenAI</option><option>Anthropic</option><option>Google</option><option>DeepSeek</option><option>阿里云</option><option>其他</option></select></div>
+    </div>
+    <div class="form-group"><label>应用场景标签（逗号分隔）</label><input type="text" id="importModelTags" placeholder="如：对话, 长文本分析, 编程辅助"></div>
+    <div class="form-row">
+      <div class="form-group"><label>上下文长度</label><input type="text" id="importModelContext" placeholder="如：128K"></div>
+      <div class="form-group"><label>引入渠道</label><select id="importModelChannel"><option>官方 API</option><option>Azure</option><option>AWS Bedrock</option><option>私有部署</option><option>代理中转</option></select></div>
+    </div>
+    <div class="form-group"><label>支持输入形态</label><div class="checkbox-group">
+      <label><input type="checkbox" class="import-input-form" value="文本" checked> 文本</label>
+      <label><input type="checkbox" class="import-input-form" value="图像"> 图像</label>
+      <label><input type="checkbox" class="import-input-form" value="音频"> 音频</label>
+      <label><input type="checkbox" class="import-input-form" value="视频"> 视频</label>
+    </div></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeImportModelModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmImportModel()">确认引入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 用户详情弹窗 ============ -->
+<div class="modal-overlay" id="userDetailModal">
+  <div class="modal">
+    <h2>用户详情</h2>
+    <div class="form-group"><label>用户ID</label><input type="text" id="udUserId" readonly></div>
+    <div class="form-group"><label>邮箱</label><input type="text" id="udEmail"></div>
+    <div class="form-group"><label>注册时间</label><input type="text" id="udRegTime" readonly></div>
+    <div class="form-row">
+      <div class="form-group"><label>累计消费</label><input type="text" id="udSpent" readonly></div>
+      <div class="form-group"><label>余额</label><input type="text" id="udBalance"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeUserDetailModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveUserDetail()">保存</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============ Navigation ============
@@ -393,296 +463,378 @@ document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     item.classList.add('active');
-    const page = item.dataset.page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    if (page === 'dashboard') { setTimeout(drawCharts, 100); }
+    document.getElementById('page-' + item.dataset.page).classList.add('active');
+    if (item.dataset.page === 'dashboard') setTimeout(drawCharts, 100);
+  });
+});
+
+// Inner-page tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const parent = tab.parentElement;
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const page = parent.parentElement;
+    page.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+    document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
   });
 });
 
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
 }
 
 // ============ 模型广场 ============
 const modelsData = [
-  { id:'gpt-4o', name:'GPT-4o', vendor:'openai', vendorName:'OpenAI', cat:'chat', desc:'多模态旗舰模型，支持文本/图像/音频输入输出，128K上下文', context:'128K', latency:'320ms', inputPrice:'$2.50', outputPrice:'$10.00', tags:['hot'] },
+  { id:'gpt-4o', name:'GPT-4o', vendor:'openai', vendorName:'OpenAI', cat:'chat', desc:'多模态旗舰模型，支持文本/图像/音频输入输出', context:'128K', latency:'320ms', inputPrice:'$2.50', outputPrice:'$10.00', tags:['hot'] },
   { id:'gpt-4o-mini', name:'GPT-4o Mini', vendor:'openai', vendorName:'OpenAI', cat:'chat', desc:'轻量高效模型，性价比极高，适合大规模部署', context:'128K', latency:'180ms', inputPrice:'$0.15', outputPrice:'$0.60', tags:['fast'] },
   { id:'claude-4-sonnet', name:'Claude 4 Sonnet', vendor:'anthropic', vendorName:'Anthropic', cat:'chat', desc:'平衡性能与成本，200K上下文，擅长长文分析和推理', context:'200K', latency:'410ms', inputPrice:'$3.00', outputPrice:'$15.00', tags:['hot','new'] },
   { id:'claude-4-opus', name:'Claude 4 Opus', vendor:'anthropic', vendorName:'Anthropic', cat:'code', desc:'最强推理模型，复杂编程和数学推理的顶级选择', context:'200K', latency:'680ms', inputPrice:'$15.00', outputPrice:'$75.00', tags:['new'] },
   { id:'deepseek-v3', name:'DeepSeek V3', vendor:'local', vendorName:'DeepSeek', cat:'chat', desc:'国产开源旗舰，性能比肩国际顶尖模型，价格极低', context:'128K', latency:'285ms', inputPrice:'$0.27', outputPrice:'$1.10', tags:['hot','fast'] },
   { id:'gemini-2.5-pro', name:'Gemini 2.5 Pro', vendor:'google', vendorName:'Google', cat:'vision', desc:'Google最新旗舰，原生多模态，1M超长上下文', context:'1M', latency:'450ms', inputPrice:'$1.25', outputPrice:'$5.00', tags:['new'] },
-  { id:'qwen-max', name:'Qwen Max', vendor:'local', vendorName:'阿里云', cat:'chat', desc:'通义千问旗舰版，中文能力出色，全面对标 GPT-4', context:'32K', latency:'520ms', inputPrice:'$0.57', outputPrice:'$1.71', tags:[] },
+  { id:'qwen-max', name:'Qwen Max', vendor:'local', vendorName:'阿里云', cat:'chat', desc:'通义千问旗舰版，中文能力出色', context:'32K', latency:'520ms', inputPrice:'$0.57', outputPrice:'$1.71', tags:[] },
   { id:'text-embedding-3', name:'Embedding V3 Large', vendor:'openai', vendorName:'OpenAI', cat:'embedding', desc:'高维度文本嵌入模型，3072维，检索精度领先', context:'8K', latency:'50ms', inputPrice:'$0.13', outputPrice:'-', tags:[] },
 ];
-
-function renderModelGrid(filter = 'all') {
-  const filtered = filter === 'all' ? modelsData : modelsData.filter(m => m.cat === filter);
-  document.getElementById('modelGrid').innerHTML = filtered.map(m => `
+function renderModelGrid(filter='all'){
+  const filtered = filter==='all' ? modelsData : modelsData.filter(m=>m.cat===filter);
+  document.getElementById('modelGrid').innerHTML = filtered.map(m=>`
     <div class="model-card">
       <span class="vendor ${m.vendor}">${m.vendorName}</span>
-      ${m.tags.map(t => `<span class="tag ${t}">${t==='hot'?'热门':t==='new'?'新品':t==='fast'?'极速':''}</span>`).join(' ')}
-      <h3>${m.name}</h3>
-      <div class="desc">${m.desc}</div>
-      <div class="specs">
-        <span>📐 ${m.context}</span><span>⚡ ${m.latency}</span>
-      </div>
-      <div class="pricing">
-        <div class="price">${m.inputPrice} <small>/ 1M tokens (输入)</small></div>
-        <button class="btn btn-primary btn-sm" onclick="switchToPlayground('${m.id}')">体验</button>
-      </div>
-    </div>
-  `).join('');
+      ${m.tags.map(t=>`<span class="tag ${t}">${t==='hot'?'热门':t==='new'?'新品':t==='fast'?'极速':''}</span>`).join(' ')}
+      <h3>${m.name}</h3><div class="desc">${m.desc}</div>
+      <div class="specs"><span>📐 ${m.context}</span><span>⚡ ${m.latency}</span></div>
+      <div class="pricing"><div class="price">${m.inputPrice} <small>/ 1M tokens</small></div><button class="btn btn-primary btn-sm" onclick="switchToPlayground('${m.id}')">体验</button></div>
+    </div>`).join('');
 }
-
-function filterModels(cat) { renderModelGrid(cat); }
-function switchToPlayground(modelId) {
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+function filterModels(cat){ renderModelGrid(cat); }
+function switchToPlayground(modelId){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   document.querySelector('.nav-item[data-page="playground"]').classList.add('active');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-playground').classList.add('active');
-  const sel = document.getElementById('chatModel');
-  for (let o of sel.options) { if (o.value === modelId) { o.selected = true; break; } }
+  const sel=document.getElementById('chatModel');
+  for(let o of sel.options){ if(o.value===modelId){o.selected=true;break;} }
 }
-
 renderModelGrid();
 
 // ============ 体验中心 ============
 const demoReplies = {
-  'gpt-4o': '你好！我是 GPT-4o，OpenAI 的多模态旗舰模型。我可以处理文本、图像和音频输入，拥有 128K 的上下文窗口。有什么我可以帮你的吗？',
-  'claude-4-sonnet': '你好！我是 Claude 4 Sonnet，Anthropic 推出的高性能模型。我擅长长文档分析、代码编写和复杂推理，拥有 200K 上下文窗口。',
-  'deepseek-v3': '你好！我是 DeepSeek V3，由深度求索公司开发。我以极高的性价比著称，在数学、编程和中文任务上表现出色。',
-  'gemini-2.5-pro': '你好！我是 Gemini 2.5 Pro，Google 最新的旗舰多模态模型。我支持高达 1M token 的上下文窗口，适合处理超长文档。',
-  'qwen-max': '你好！我是通义千问 Max，阿里云出品的大型语言模型。我在中文理解、文档处理和代码生成方面都有着出色的表现。',
+  'gpt-4o':'你好！我是 GPT-4o，OpenAI 的多模态旗舰模型。我可以处理文本、图像和音频输入，拥有 128K 的上下文窗口。',
+  'claude-4-sonnet':'你好！我是 Claude 4 Sonnet，Anthropic 推出的高性能模型。我擅长长文档分析、代码编写和复杂推理，拥有 200K 上下文窗口。',
+  'deepseek-v3':'你好！我是 DeepSeek V3，由深度求索公司开发。我以极高的性价比著称，在数学、编程和中文任务上表现出色。',
+  'gemini-2.5-pro':'你好！我是 Gemini 2.5 Pro，Google 最新的旗舰多模态模型。我支持高达 1M token 的上下文窗口。',
+  'qwen-max':'你好！我是通义千问 Max，阿里云出品的大型语言模型。我在中文理解、文档处理和代码生成方面表现出色。',
 };
-
-function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  const container = document.getElementById('chatMessages');
-  container.innerHTML += `<div class="chat-msg user"><div class="avatar">U</div><div class="bubble">${escapeHtml(msg)}</div></div>`;
-  input.value = '';
-  container.scrollTop = container.scrollHeight;
-  const model = document.getElementById('chatModel').value;
-  setTimeout(() => {
-    const typingMsg = document.createElement('div');
-    typingMsg.className = 'chat-msg assistant';
-    typingMsg.innerHTML = '<div class="avatar">AI</div><div class="bubble" style="color:var(--text-muted)">思考中...</div>';
-    container.appendChild(typingMsg);
-    container.scrollTop = container.scrollHeight;
-    setTimeout(() => {
-      typingMsg.querySelector('.bubble').textContent = demoReplies[model] || '这是一个模拟的模型回复。';
-      typingMsg.querySelector('.bubble').style.color = '';
-      container.scrollTop = container.scrollHeight;
-    }, 800 + Math.random() * 1200);
-  }, 300);
+function sendMessage(){
+  const input=document.getElementById('chatInput'), msg=input.value.trim(); if(!msg) return;
+  const container=document.getElementById('chatMessages');
+  container.innerHTML+=`<div class="chat-msg user"><div class="avatar">U</div><div class="bubble">${escapeHtml(msg)}</div></div>`;
+  input.value=''; container.scrollTop=container.scrollHeight;
+  const model=document.getElementById('chatModel').value;
+  setTimeout(()=>{
+    const typingMsg=document.createElement('div'); typingMsg.className='chat-msg assistant';
+    typingMsg.innerHTML='<div class="avatar">AI</div><div class="bubble" style="color:var(--text-muted)">思考中...</div>';
+    container.appendChild(typingMsg); container.scrollTop=container.scrollHeight;
+    setTimeout(()=>{typingMsg.querySelector('.bubble').textContent=demoReplies[model]||'模拟回复';typingMsg.querySelector('.bubble').style.color='';container.scrollTop=container.scrollHeight;},800+Math.random()*1200);
+  },300);
 }
-
-function clearChat() {
-  document.getElementById('chatMessages').innerHTML = '';
-}
-
-function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function clearChat(){ document.getElementById('chatMessages').innerHTML=''; }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // ============ 令牌管理 ============
 let tokens = [
-  { id:1, name:'生产环境密钥', key:'sk-prod-8a7b3c2d1e4f5a6b7c8d9e0f', models:'全部模型', limit:'$100/月', used:'$42.30', status:'active', expires:'2027-01-15' },
-  { id:2, name:'开发测试密钥', key:'sk-dev-1a2b3c4d5e6f7a8b9c0d1e2f', models:'GPT-4o Mini, DeepSeek', limit:'$20/月', used:'$8.50', status:'active', expires:'2026-08-20' },
-  { id:3, name:'只读令牌', key:'sk-ro-9f8e7d6c5b4a39281706f5e4', models:'仅查询', limit:'$5/月', used:'$1.20', status:'active', expires:'2026-06-30' },
+  { id:1, name:'生产环境密钥', key:'sk-prod-8a7b3c2d1e4f5a6b7c8d9e0f', models:['gpt-4o','claude-4-sonnet','deepseek-v3'], limitPeriod:'month', limitAmount:100, used:42.30, status:'active', expires:'2027-01-15' },
+  { id:2, name:'开发测试密钥', key:'sk-dev-1a2b3c4d5e6f7a8b9c0d1e2f', models:['gpt-4o-mini','deepseek-v3'], limitPeriod:'day', limitAmount:20, used:8.50, status:'active', expires:'2026-08-20' },
+  { id:3, name:'只读令牌', key:'sk-ro-9f8e7d6c5b4a39281706f5e4', models:['gpt-4o-mini'], limitPeriod:'month', limitAmount:5, used:1.20, status:'active', expires:'2026-06-30' },
 ];
+let editingTokenId = null;
 
-function renderTokenTable() {
-  document.getElementById('tokenTable').innerHTML = tokens.map(t => `
+function modelNames(models) {
+  const map = { 'gpt-4o':'GPT-4o','gpt-4o-mini':'GPT-4o Mini','claude-4-sonnet':'Claude 4 Sonnet','claude-4-opus':'Claude 4 Opus','deepseek-v3':'DeepSeek V3','gemini-2.5-pro':'Gemini 2.5 Pro','qwen-max':'Qwen Max','text-embedding-3':'Embedding V3' };
+  return models.length===modelsData.length?'全部模型':models.map(m=>map[m]||m).join(', ');
+}
+function renderTokenTable(){
+  document.getElementById('tokenTable').innerHTML = tokens.map(t=>`
     <tr>
       <td><strong>${t.name}</strong></td>
       <td><span class="code">${t.key.slice(0,12)}...${t.key.slice(-4)}</span> <span style="cursor:pointer;font-size:12px;" onclick="copyToken('${t.key}')" title="复制">📋</span></td>
-      <td>${t.models}</td>
-      <td>${t.limit}</td>
-      <td>${t.used}</td>
+      <td>${modelNames(t.models)}</td>
+      <td>$${t.limitAmount}/${t.limitPeriod==='day'?'天':'月'}</td>
+      <td>$${t.used.toFixed(2)}</td>
       <td><span class="badge ${t.status==='active'?'success':'danger'}">${t.status==='active'?'活跃':'已禁用'}</span></td>
       <td>${t.expires}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="copyToken('${t.key}')">复制</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteToken(${t.id})" style="margin-left:4px;">删除</button>
+        <button class="btn btn-outline btn-sm" onclick="editToken(${t.id})">编辑</button>
+        <button class="btn btn-${t.status==='active'?'warn':'success'} btn-sm" onclick="toggleToken(${t.id})" style="margin:0 2px;">${t.status==='active'?'禁用':'启用'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteToken(${t.id})">删除</button>
       </td>
-    </tr>
-  `).join('');
-  document.getElementById('activeTokenCount').textContent = tokens.length;
+    </tr>`).join('');
+  document.getElementById('activeTokenCount').textContent = tokens.filter(t=>t.status==='active').length;
 }
-
-function createToken() {
-  const name = prompt('令牌名称：', '新令牌');
-  if (!name) return;
-  const chars = 'abcdef0123456789';
-  let key = 'sk-';
-  for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
-  tokens.push({ id:Date.now(), name, key, models:'全部模型', limit:'$50/月', used:'$0.00', status:'active', expires:'2027-05-21' });
-  renderTokenTable();
-  toast('令牌创建成功！请妥善保管密钥');
+function openTokenModal(editId){
+  editingTokenId = editId||null;
+  document.getElementById('tokenModalTitle').textContent = editId?'编辑令牌':'创建令牌';
+  document.getElementById('tokenModalConfirm').textContent = editId?'保存':'创建';
+  document.getElementById('modelCheckboxes').innerHTML = modelsData.map(m=>{
+    let checked = true; if(editId){ const tok=tokens.find(t=>t.id===editId); checked=tok.models.includes(m.id); }
+    return `<label><input type="checkbox" value="${m.id}" ${checked?'checked':''}> ${m.name}</label>`;
+  }).join('');
+  if(editId){ const t=tokens.find(tk=>tk.id===editId);
+    document.getElementById('tokenName').value=t.name; document.getElementById('tokenLimitPeriod').value=t.limitPeriod;
+    document.getElementById('tokenLimitAmount').value=t.limitAmount; document.getElementById('tokenExpires').value=t.expires;
+  } else {
+    document.getElementById('tokenName').value=''; document.getElementById('tokenLimitAmount').value=50;
+    document.getElementById('tokenExpires').value='2027-05-21';
+  }
+  document.getElementById('tokenModal').classList.add('show');
 }
-
-function deleteToken(id) { tokens = tokens.filter(t => t.id !== id); renderTokenTable(); toast('令牌已删除'); }
-function copyToken(key) { navigator.clipboard.writeText(key).then(() => toast('已复制到剪贴板')); }
-
+function closeTokenModal(){ document.getElementById('tokenModal').classList.remove('show'); }
+function confirmToken(){
+  const name=document.getElementById('tokenName').value.trim(); if(!name) return toast('请输入令牌名称');
+  const models=Array.from(document.querySelectorAll('#modelCheckboxes input:checked')).map(cb=>cb.value);
+  if(!models.length) return toast('请至少勾选一个模型');
+  const lp=document.getElementById('tokenLimitPeriod').value;
+  const la=parseFloat(document.getElementById('tokenLimitAmount').value);
+  const exp=document.getElementById('tokenExpires').value;
+  if(editingTokenId){
+    const t=tokens.find(tk=>tk.id===editingTokenId); if(!t) return;
+    t.name=name; t.models=models; t.limitPeriod=lp; t.limitAmount=la; t.expires=exp;
+    toast('令牌已更新');
+  } else {
+    const chars='abcdef0123456789'; let key='sk-'; for(let i=0;i<32;i++) key+=chars[Math.floor(Math.random()*chars.length)];
+    tokens.push({ id:Date.now(), name, key, models, limitPeriod:lp, limitAmount:la, used:0, status:'active', expires:exp });
+    toast('令牌创建成功！请妥善保管密钥');
+  }
+  closeTokenModal(); renderTokenTable();
+}
+function editToken(id){ openTokenModal(id); }
+function toggleToken(id){ const t=tokens.find(tk=>tk.id===id); if(!t) return;
+  t.status=t.status==='active'?'disabled':'active';
+  renderTokenTable(); toast(t.status==='active'?'令牌已启用':'令牌已禁用');
+}
+function deleteToken(id){ tokens=tokens.filter(t=>t.id!==id); renderTokenTable(); toast('令牌已删除'); }
+function copyToken(key){ navigator.clipboard.writeText(key).then(()=>toast('已复制到剪贴板')); }
 renderTokenTable();
 
 // ============ 钱包管理 ============
-let wallet = { balance: 128.50, transactions: [
+let wallet = { balance:128.50, transactions:[
   { time:'2026-05-20 14:30', type:'消费', amount:'-$2.35', balance:'$128.50', note:'GPT-4o API 调用' },
   { time:'2026-05-19 10:15', type:'充值', amount:'+$50.00', balance:'$130.85', note:'在线充值' },
   { time:'2026-05-18 09:00', type:'消费', amount:'-$1.80', balance:'$80.85', note:'Claude API 调用' },
   { time:'2026-05-17 16:45', type:'兑换', amount:'+$30.00', balance:'$82.65', note:'兑换码: SUMMER2026' },
   { time:'2026-05-16 11:20', type:'消费', amount:'-$0.95', balance:'$52.65', note:'DeepSeek API 调用' },
 ]};
-
-function renderWallet() {
-  document.getElementById('walletBalance').textContent = '$' + wallet.balance.toFixed(2);
-  document.getElementById('txTable').innerHTML = wallet.transactions.map(tx => `
-    <tr>
-      <td>${tx.time}</td>
-      <td><span class="badge ${tx.type==='充值'||tx.type==='兑换'?'success':tx.type==='消费'?'warn':'warn'}">${tx.type}</span></td>
-      <td style="color:${tx.amount.startsWith('+')?'var(--green)':'var(--text)'};">${tx.amount}</td>
-      <td>${tx.balance}</td>
-      <td>${tx.note}</td>
-    </tr>
-  `).join('');
+function renderWallet(){
+  document.getElementById('walletBalance').textContent='$'+wallet.balance.toFixed(2);
+  document.getElementById('txTable').innerHTML=wallet.transactions.map(tx=>`
+    <tr><td>${tx.time}</td><td><span class="badge ${tx.type==='充值'||tx.type==='兑换'?'success':'warn'}">${tx.type}</span></td>
+    <td style="color:${tx.amount.startsWith('+')?'var(--green)':'var(--text)'};">${tx.amount}</td><td>${tx.balance}</td><td>${tx.note}</td></tr>`).join('');
 }
-
-function showRecharge() {
-  const amounts = ['10', '20', '50', '100', '200', '500'];
-  const html = '选择充值金额：\n' + amounts.map(a => `$${a}`).join(' / ');
-  const amt = prompt(html, '50');
-  if (!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
-  wallet.balance += parseFloat(amt);
+function showRecharge(){
+  const amt=prompt('选择充值金额：\n$10 / $20 / $50 / $100 / $200 / $500','50'); if(!amt||isNaN(amt)||parseFloat(amt)<=0) return;
+  wallet.balance+=parseFloat(amt);
   wallet.transactions.unshift({ time:new Date().toLocaleString('zh-CN',{hour12:false}), type:'充值', amount:'+$'+parseFloat(amt).toFixed(2), balance:'$'+wallet.balance.toFixed(2), note:'在线充值' });
-  renderWallet();
-  toast(`充值成功！到账 $${parseFloat(amt).toFixed(2)}`);
+  renderWallet(); toast(`充值成功！到账 $${parseFloat(amt).toFixed(2)}`);
 }
-
-const validCodes = { 'VIP2026':20, 'SUMMER':15, 'WELCOME':5, 'MODELHUB':30, 'NEWUSER':10 };
-function redeemCode() {
-  const input = document.getElementById('redeemInput');
-  const code = input.value.trim().toUpperCase();
-  const msgEl = document.getElementById('redeemMsg');
-  if (!code) { msgEl.innerHTML = '<span style="color:var(--red)">请输入兑换码</span>'; return; }
-  if (validCodes[code]) {
-    const amt = validCodes[code];
-    wallet.balance += amt;
+const validCodes={'VIP2026':20,'SUMMER':15,'WELCOME':5,'MODELHUB':30,'NEWUSER':10};
+function redeemCode(){
+  const input=document.getElementById('redeemInput'), code=input.value.trim().toUpperCase(), msgEl=document.getElementById('redeemMsg');
+  if(!code){msgEl.innerHTML='<span style="color:var(--red)">请输入兑换码</span>';return;}
+  if(validCodes[code]){ const amt=validCodes[code]; wallet.balance+=amt;
     wallet.transactions.unshift({ time:new Date().toLocaleString('zh-CN',{hour12:false}), type:'兑换', amount:'+$'+amt.toFixed(2), balance:'$'+wallet.balance.toFixed(2), note:'兑换码: '+code });
-    renderWallet();
-    msgEl.innerHTML = `<span style="color:var(--green)">兑换成功！到账 $${amt.toFixed(2)}，当前余额 $${wallet.balance.toFixed(2)}</span>`;
-    input.value = '';
+    renderWallet(); msgEl.innerHTML=`<span style="color:var(--green)">兑换成功！到账 $${amt.toFixed(2)}，当前余额 $${wallet.balance.toFixed(2)}</span>`; input.value='';
     toast(`兑换码兑换成功！+$${amt.toFixed(2)}`);
-  } else {
-    msgEl.innerHTML = '<span style="color:var(--red)">无效的兑换码，请检查后重试</span>';
-    // Show available codes as hint
-    msgEl.innerHTML += '<br><span style="color:var(--text-muted);font-size:11px;">可用测试码：VIP2026, SUMMER, WELCOME, MODELHUB, NEWUSER</span>';
-  }
+  } else { msgEl.innerHTML='<span style="color:var(--red)">无效的兑换码</span><br><span style="color:var(--text-muted);font-size:11px;">可用测试码：VIP2026, SUMMER, WELCOME, MODELHUB, NEWUSER</span>'; }
 }
-
 renderWallet();
 
 // ============ 数据看板 ============
-function drawCharts() {
+function drawCharts(){
+  const dpr = window.devicePixelRatio||1;
   // Call trend chart
-  const ctx1 = document.getElementById('callTrendChart');
-  if (!ctx1) return;
-  const dpr = window.devicePixelRatio || 1;
-  const rect = ctx1.parentElement.getBoundingClientRect();
-  ctx1.width = rect.width * dpr;
-  ctx1.height = rect.height * dpr;
-  const c1 = ctx1.getContext('2d');
-  c1.scale(dpr, dpr);
-  const w = rect.width, h = rect.height;
-  c1.clearRect(0, 0, w, h);
+  const ctx1=document.getElementById('callTrendChart'); if(!ctx1) return;
+  const r1=ctx1.parentElement.getBoundingClientRect(); ctx1.width=r1.width*dpr; ctx1.height=r1.height*dpr;
+  const c1=ctx1.getContext('2d'); c1.scale(dpr,dpr); c1.clearRect(0,0,r1.width,r1.height);
+  const days=['5/15','5/16','5/17','5/18','5/19','5/20','5/21'];
+  const calls=[4200,3800,5100,4600,5800,6200,5400], success=[4150,3720,5050,4520,5750,6150,5350];
+  drawLineChart(c1, r1.width, r1.height, days, [calls,success], ['#6366f1','#22c55e'], Math.max(...calls));
 
-  const days = ['5/15','5/16','5/17','5/18','5/19','5/20','5/21'];
-  const calls = [4200, 3800, 5100, 4600, 5800, 6200, 5400];
-  const success = [4150, 3720, 5050, 4520, 5750, 6150, 5350];
-  const maxVal = Math.max(...calls);
-  const pad = { top: 20, right: 20, bottom: 30, left: 50 };
-  const gw = w - pad.left - pad.right, gh = h - pad.top - pad.bottom;
-
-  // grid lines
-  c1.strokeStyle = '#1e293b';
-  c1.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (gh / 4) * i;
-    c1.beginPath(); c1.moveTo(pad.left, y); c1.lineTo(w - pad.right, y); c1.stroke();
-    c1.fillStyle = '#64748b'; c1.font = '11px -apple-system, sans-serif';
-    c1.fillText(Math.round(maxVal * (1 - i/4)), 0, y + 4);
-  }
-  // x labels
-  c1.textAlign = 'center';
-  days.forEach((d, i) => c1.fillText(d, pad.left + (gw / (days.length - 1)) * i, h - 8));
-
-  function drawLine(data, color) {
-    c1.strokeStyle = color;
-    c1.lineWidth = 2;
-    c1.beginPath();
-    data.forEach((val, i) => {
-      const x = pad.left + (gw / (data.length - 1)) * i;
-      const y = pad.top + gh - (val / maxVal) * gh;
-      if (i === 0) c1.moveTo(x, y); else c1.lineTo(x, y);
-    });
-    c1.stroke();
-    // dots
-    data.forEach((val, i) => {
-      const x = pad.left + (gw / (data.length - 1)) * i;
-      const y = pad.top + gh - (val / maxVal) * gh;
-      c1.fillStyle = color;
-      c1.beginPath(); c1.arc(x, y, 3, 0, Math.PI * 2); c1.fill();
-    });
-  }
-  drawLine(calls, '#6366f1');
-  drawLine(success, '#22c55e');
+  // Token trend chart
+  const ctx2=document.getElementById('tokenTrendChart');
+  const r2=ctx2.parentElement.getBoundingClientRect(); ctx2.width=r2.width*dpr; ctx2.height=r2.height*dpr;
+  const c2=ctx2.getContext('2d'); c2.scale(dpr,dpr); c2.clearRect(0,0,r2.width,r2.height);
+  const inTokens=[1.2,1.0,1.5,1.3,1.8,2.1,1.7], outTokens=[0.6,0.5,0.8,0.7,0.9,1.1,0.8];
+  const totals=inTokens.map((v,i)=>v+outTokens[i]);
+  drawLineChart(c2, r2.width, r2.height, days, [inTokens,outTokens,totals], ['#6366f1','#f59e0b','#22c55e'], Math.max(...totals));
 
   // Pie chart
-  const ctx2 = document.getElementById('modelPieChart');
-  const rect2 = ctx2.parentElement.getBoundingClientRect();
-  ctx2.width = rect2.width * dpr;
-  ctx2.height = rect2.height * dpr;
-  const c2 = ctx2.getContext('2d');
-  c2.scale(dpr, dpr);
-  const w2 = rect2.width, h2 = rect2.height;
-  const cx = w2 / 2, cy = h2 / 2, r = Math.min(cx, cy) - 20;
-  c2.clearRect(0, 0, w2, h2);
+  const ctx3=document.getElementById('modelPieChart');
+  const r3=ctx3.parentElement.getBoundingClientRect(); ctx3.width=r3.width*dpr; ctx3.height=r3.height*dpr;
+  const c3=ctx3.getContext('2d'); c3.scale(dpr,dpr); c3.clearRect(0,0,r3.width,r3.height);
+  drawPie(c3, r3.width, r3.height, [{v:35,c:'#6366f1'},{v:26,c:'#22c55e'},{v:21,c:'#f59e0b'},{v:18,c:'#3b82f6'}]);
 
-  const slices = [
-    { val: 35, color: '#6366f1', label: 'GPT-4o' },
-    { val: 26, color: '#22c55e', label: 'Claude' },
-    { val: 21, color: '#f59e0b', label: 'DeepSeek' },
-    { val: 18, color: '#3b82f6', label: '其他' },
-  ];
-  const total = slices.reduce((s, sl) => s + sl.val, 0);
-  let angle = -Math.PI / 2;
-  slices.forEach(sl => {
-    const sliceAngle = (sl.val / total) * Math.PI * 2;
-    c2.fillStyle = sl.color;
-    c2.beginPath(); c2.moveTo(cx, cy);
-    c2.arc(cx, cy, r, angle, angle + sliceAngle);
-    c2.closePath(); c2.fill();
-    // label
-    const midAngle = angle + sliceAngle / 2;
-    const lx = cx + Math.cos(midAngle) * (r * 0.65);
-    const ly = cy + Math.sin(midAngle) * (r * 0.65);
-    c2.fillStyle = '#fff';
-    c2.font = 'bold 11px -apple-system, sans-serif';
-    c2.textAlign = 'center';
-    c2.fillText(sl.val + '%', lx, ly);
-    angle += sliceAngle;
-  });
+  // Cost bar chart
+  const ctx4=document.getElementById('costBarChart');
+  const r4=ctx4.parentElement.getBoundingClientRect(); ctx4.width=r4.width*dpr; ctx4.height=r4.height*dpr;
+  const c4=ctx4.getContext('2d'); c4.scale(dpr,dpr); c4.clearRect(0,0,r4.width,r4.height);
+  const models=['GPT-4o','Claude','DeepSeek','Gemini','Qwen','其他'];
+  const costs=[523,341,89,157,98,39]; drawBarChart(c4, r4.width, r4.height, models, costs, '#6366f1');
 }
 
-// Draw charts when navigating to dashboard
-document.querySelector('.nav-item[data-page="dashboard"]').addEventListener('click', () => setTimeout(drawCharts, 150));
+function drawLineChart(c, w, h, labels, datasets, colors, maxVal){
+  const pad={top:20,right:20,bottom:30,left:55}, gw=w-pad.left-pad.right, gh=h-pad.top-pad.bottom;
+  c.strokeStyle='#1e293b'; c.lineWidth=1;
+  for(let i=0;i<=4;i++){ const y=pad.top+(gh/4)*i; c.beginPath(); c.moveTo(pad.left,y); c.lineTo(w-pad.right,y); c.stroke(); }
+  c.fillStyle='#64748b'; c.font='11px -apple-system, sans-serif'; c.textAlign='right';
+  for(let i=0;i<=4;i++){ const y=pad.top+(gh/4)*i; c.fillText(Math.round(maxVal*(1-i/4)), pad.left-8, y+4); }
+  c.textAlign='center'; labels.forEach((d,i)=>c.fillText(d, pad.left+(gw/(labels.length-1))*i, h-8));
+  datasets.forEach((data,di)=>{
+    c.strokeStyle=colors[di]; c.lineWidth=2; c.beginPath();
+    data.forEach((v,i)=>{ const x=pad.left+(gw/(data.length-1))*i, y=pad.top+gh-(v/maxVal)*gh; if(i===0)c.moveTo(x,y); else c.lineTo(x,y); });
+    c.stroke();
+    data.forEach((v,i)=>{ const x=pad.left+(gw/(data.length-1))*i, y=pad.top+gh-(v/maxVal)*gh; c.fillStyle=colors[di]; c.beginPath(); c.arc(x,y,3,0,Math.PI*2); c.fill(); });
+  });
+}
+function drawPie(c, w, h, slices){
+  const cx=w/2, cy=h/2, r=Math.min(cx,cy)-20, total=slices.reduce((s,sl)=>s+sl.v,0);
+  let angle=-Math.PI/2;
+  slices.forEach(sl=>{
+    const sa=(sl.v/total)*Math.PI*2; c.fillStyle=sl.c; c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,r,angle,angle+sa); c.closePath(); c.fill();
+    const ma=angle+sa/2; c.fillStyle='#fff'; c.font='bold 11px -apple-system, sans-serif'; c.textAlign='center';
+    c.fillText(sl.v+'%', cx+Math.cos(ma)*r*0.65, cy+Math.sin(ma)*r*0.65); angle+=sa;
+  });
+}
+function drawBarChart(c, w, h, labels, values, color){
+  const pad={top:20,right:20,bottom:35,left:55}, gw=w-pad.left-pad.right, gh=h-pad.top-pad.bottom;
+  const maxVal=Math.max(...values)*1.15, barW=gw/labels.length*0.6, gap=gw/labels.length;
+  c.strokeStyle='#1e293b'; c.lineWidth=1;
+  for(let i=0;i<=4;i++){ const y=pad.top+(gh/4)*i; c.beginPath(); c.moveTo(pad.left,y); c.lineTo(w-pad.right,y); c.stroke(); }
+  c.fillStyle='#64748b'; c.font='11px -apple-system, sans-serif'; c.textAlign='right';
+  for(let i=0;i<=4;i++){ const y=pad.top+(gh/4)*i; c.fillText('$'+Math.round(maxVal*(1-i/4)), pad.left-8, y+4); }
+  c.textAlign='center'; labels.forEach((d,i)=>c.fillText(d, pad.left+gap*i+gap/2, h-8));
+  values.forEach((v,i)=>{ const bh=(v/maxVal)*gh; c.fillStyle=color; c.globalAlpha=0.8; c.fillRect(pad.left+gap*i+(gap-barW)/2, pad.top+gh-bh, barW, bh); c.globalAlpha=1; });
+  c.fillStyle='#94a3b8'; c.font='11px -apple-system, sans-serif';
+  values.forEach((v,i)=>{ const bh=(v/maxVal)*gh; c.textAlign='center'; c.fillText('$'+v, pad.left+gap*i+gap/2, pad.top+gh-bh-6); });
+}
+document.querySelector('.nav-item[data-page="dashboard"]').addEventListener('click', ()=>setTimeout(drawCharts,150));
+setTimeout(drawCharts,100);
+setTimeout(drawCharts,500);
+window.addEventListener('resize', ()=>{ if(document.getElementById('page-dashboard').classList.contains('active')) drawCharts(); });
 
-// Initial draw if dashboard is visible
-setTimeout(drawCharts, 300);
-window.addEventListener('resize', () => { if (document.getElementById('page-dashboard').classList.contains('active')) drawCharts(); });
+// ============ 系统管理 ============
+// 模型引入
+let importedModels = [
+  { id:1, name:'GPT-4o', vendor:'OpenAI', type:'对话模型', tags:'多模态,长文分析', context:'128K', inputForms:'文本,图像,音频', channel:'官方 API', status:'active' },
+  { id:2, name:'Claude 4 Sonnet', vendor:'Anthropic', type:'对话模型', tags:'长文分析,编程', context:'200K', inputForms:'文本,图像', channel:'官方 API', status:'active' },
+];
+function renderImportedModels(){
+  document.getElementById('importedModelsTable').innerHTML = importedModels.map(im=>`
+    <tr><td><strong>${im.name}</strong></td><td><span class="badge info">${im.vendor}</span></td><td>${im.type}</td><td>${im.tags}</td><td>${im.context}</td><td>${im.inputForms}</td><td>${im.channel}</td>
+    <td><span class="badge ${im.status==='active'?'success':'danger'}">${im.status==='active'?'已上线':'已下线'}</span></td>
+    <td><button class="btn btn-${im.status==='active'?'warn':'success'} btn-sm" onclick="toggleImportedModel(${im.id})" style="margin-right:4px;">${im.status==='active'?'下线':'上线'}</button><button class="btn btn-danger btn-sm" onclick="deleteImportedModel(${im.id})">移除</button></td></tr>`).join('');
+}
+function openImportModelModal(){ document.getElementById('importModelModal').classList.add('show'); }
+function closeImportModelModal(){ document.getElementById('importModelModal').classList.remove('show'); }
+function confirmImportModel(){
+  const name=document.getElementById('importModelName').value.trim(); if(!name) return toast('请输入模型名称');
+  importedModels.push({ id:Date.now(), name,
+    vendor:document.getElementById('importModelVendor').value,
+    type:document.getElementById('importModelType').value,
+    tags:document.getElementById('importModelTags').value,
+    context:document.getElementById('importModelContext').value,
+    inputForms:Array.from(document.querySelectorAll('.import-input-form:checked')).map(cb=>cb.value).join(','),
+    channel:document.getElementById('importModelChannel').value, status:'active'
+  });
+  closeImportModelModal(); renderImportedModels(); toast('模型引入成功');
+}
+function toggleImportedModel(id){ const im=importedModels.find(m=>m.id===id); im.status=im.status==='active'?'disabled':'active'; renderImportedModels(); toast(im.status==='active'?'模型已上线':'模型已下线'); }
+function deleteImportedModel(id){ importedModels=importedModels.filter(m=>m.id!==id); renderImportedModels(); toast('模型已移除'); }
+renderImportedModels();
+
+// 模型定价
+let pricingData = [
+  { id:1, model:'GPT-4o', method:'按用量', inputPrice:2.50, outputPrice:10.00, perCallPrice:'-', minRecharge:10, status:'active' },
+  { id:2, model:'Claude 4 Sonnet', method:'按用量', inputPrice:3.00, outputPrice:15.00, perCallPrice:'-', minRecharge:10, status:'active' },
+  { id:3, model:'DeepSeek V3', method:'按用量', inputPrice:0.27, outputPrice:1.10, perCallPrice:'-', minRecharge:5, status:'active' },
+  { id:4, model:'GPT-4o Mini', method:'按用量', inputPrice:0.15, outputPrice:0.60, perCallPrice:'-', minRecharge:5, status:'active' },
+  { id:5, model:'Embedding V3', method:'按用量', inputPrice:0.13, outputPrice:'-', perCallPrice:'$0.0005', minRecharge:5, status:'active' },
+];
+function renderPricingTable(){
+  document.getElementById('pricingTable').innerHTML = pricingData.map(p=>`
+    <tr><td><strong>${p.model}</strong></td><td>${p.method}</td><td>$${typeof p.inputPrice==='number'?p.inputPrice.toFixed(2):p.inputPrice}</td>
+    <td>$${typeof p.outputPrice==='number'?p.outputPrice.toFixed(2):p.outputPrice}</td><td>${p.perCallPrice}</td><td>$${p.minRecharge}</td>
+    <td><span class="badge ${p.status==='active'?'success':'danger'}">${p.status==='active'?'启用':'已停用'}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="editPricing(${p.id})">编辑</button></td></tr>`).join('');
+}
+function editPricing(id){
+  const p=pricingData.find(pr=>pr.id===id); if(!p) return;
+  const ni=prompt('输入价格 ($/1M tokens):',p.inputPrice); if(ni===null) return;
+  const no=prompt('输出价格 ($/1M tokens):',p.outputPrice); if(no===null) return;
+  p.inputPrice=parseFloat(ni)||p.inputPrice; p.outputPrice=parseFloat(no)||p.outputPrice;
+  renderPricingTable(); toast('定价已更新');
+}
+renderPricingTable();
+
+// 用户管理
+let users = [
+  { id:'U1001', email:'alice@example.com', regTime:'2026-01-15', spent:2340.50, balance:158.20, status:'active' },
+  { id:'U1002', email:'bob@company.cn', regTime:'2026-02-20', spent:890.00, balance:45.30, status:'active' },
+  { id:'U1003', email:'charlie@test.org', regTime:'2026-03-10', spent:56.80, balance:12.00, status:'active' },
+  { id:'U1004', email:'dave@spam.com', regTime:'2026-04-05', spent:0, balance:5.00, status:'disabled' },
+];
+function renderUserTable(){
+  const q=(document.getElementById('userSearch')?.value||'').toLowerCase();
+  const filtered=users.filter(u=>!q||u.email.toLowerCase().includes(q)||u.id.toLowerCase().includes(q));
+  document.getElementById('userTable').innerHTML = filtered.map(u=>`
+    <tr><td>${u.id}</td><td>${u.email}</td><td>${u.regTime}</td><td>$${u.spent.toFixed(2)}</td><td>$${u.balance.toFixed(2)}</td>
+    <td><span class="badge ${u.status==='active'?'success':'danger'}">${u.status==='active'?'正常':'已禁用'}</span></td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="viewUser('${u.id}')" style="margin-right:4px;">查询</button>
+      <button class="btn btn-${u.status==='active'?'warn':'success'} btn-sm" onclick="toggleUser('${u.id}')" style="margin-right:4px;">${u.status==='active'?'禁用':'启用'}</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">删除</button>
+    </td></tr>`).join('');
+}
+function toggleUser(id){ const u=users.find(us=>us.id===id); u.status=u.status==='active'?'disabled':'active'; renderUserTable(); toast(u.status==='active'?'用户已解禁':'用户已禁用'); }
+function deleteUser(id){ users=users.filter(u=>u.id!==id); renderUserTable(); toast('用户已删除'); }
+let viewingUserId=null;
+function viewUser(id){
+  const u=users.find(us=>us.id===id); if(!u) return; viewingUserId=id;
+  document.getElementById('udUserId').value=u.id; document.getElementById('udEmail').value=u.email;
+  document.getElementById('udRegTime').value=u.regTime; document.getElementById('udSpent').value='$'+u.spent.toFixed(2);
+  document.getElementById('udBalance').value=u.balance;
+  document.getElementById('userDetailModal').classList.add('show');
+}
+function closeUserDetailModal(){ document.getElementById('userDetailModal').classList.remove('show'); }
+function saveUserDetail(){
+  const u=users.find(us=>us.id===viewingUserId); if(!u) return;
+  u.email=document.getElementById('udEmail').value; u.balance=parseFloat(document.getElementById('udBalance').value)||u.balance;
+  closeUserDetailModal(); renderUserTable(); toast('用户信息已更新');
+}
+renderUserTable();
+
+// ============ 文档中心 ============
+function renderBilling(){
+  const bills=[{id:'INV-2026001',time:'2026-05-20 14:30',amount:50.00,method:'微信支付',status:'已支付',note:'在线充值'},
+    {id:'INV-2026002',time:'2026-05-15 09:20',amount:100.00,method:'支付宝',status:'已支付',note:'在线充值'},
+    {id:'INV-2026003',time:'2026-05-10 16:45',amount:30.00,method:'兑换码',status:'已支付',note:'兑换码: SUMMER2026'},
+    {id:'INV-2026004',time:'2026-05-05 11:00',amount:20.00,method:'微信支付',status:'已支付',note:'在线充值'}];
+  document.getElementById('billingTable').innerHTML=bills.map(b=>
+    `<tr><td>${b.id}</td><td>${b.time}</td><td>$${b.amount.toFixed(2)}</td><td>${b.method}</td><td><span class="badge success">${b.status}</span></td><td>${b.note}</td></tr>`).join('');
+  const total=bills.reduce((s,b)=>s+b.amount,0);
+  document.getElementById('billingTotal').textContent=`合计：$${total.toFixed(2)} (共 ${bills.length} 笔)`;
+}
+function submitInvoice(){
+  const title=document.getElementById('invoiceTitle').value.trim(), taxNo=document.getElementById('invoiceTaxNo').value.trim();
+  const amount=document.getElementById('invoiceAmount').value.trim(), email=document.getElementById('invoiceEmail').value.trim(), msgEl=document.getElementById('invoiceMsg');
+  if(!title||!amount||!email){ msgEl.innerHTML='<span style="color:var(--red)">请填写发票抬头、金额和接收邮箱</span>';return;}
+  msgEl.innerHTML='<span style="color:var(--green)">发票申请已提交！我们将于 3 个工作日内发送至 '+email+'</span>'; toast('发票申请已提交');
+}
+renderBilling();
+
+// ============ Modal backdrop click ============
+document.querySelectorAll('.modal-overlay').forEach(ov=>{ ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show'); }); });
 </script>
 </body>
 </html>
